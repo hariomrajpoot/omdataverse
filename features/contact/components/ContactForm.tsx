@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
-import { contactLeadSchema, type ContactLead } from "@/lib/validation";
-import { cn } from "@/lib/utils";
+import { useEffect, useMemo, useState, useTransition } from "react";
+import { contactLeadSchema, type ContactLead } from "@/features/contact/lib/validation";
+import { cn } from "@/features/shared/lib/utils";
 
 export interface ContactFormProps {
   heading?: string;
@@ -32,13 +32,19 @@ export function ContactForm({
 
   const parsed = useMemo(() => contactLeadSchema.safeParse(form), [form]);
 
+  useEffect(() => {
+    if (status.kind === "success") {
+      const timer = setTimeout(() => setStatus({ kind: "idle" }), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [status]);
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitted(true);
     setStatus({ kind: "idle" });
 
-    const validation = contactLeadSchema.safeParse(form);
-    if (!validation.success) {
+    if (!parsed.success) {
       setStatus({
         kind: "error",
         message: "Please fix the highlighted fields and try again.",
@@ -51,7 +57,7 @@ export function ContactForm({
         const res = await fetch("/api/contact", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify(validation.data),
+          body: JSON.stringify(parsed.data),
         });
 
         const data = (await res.json().catch(() => null)) as
@@ -68,7 +74,9 @@ export function ContactForm({
         }
 
         setStatus({ kind: "success", message: data.message });
-        setForm((prev) => ({ ...prev, message: "" }));
+        setForm({ name: "", email: "", message: "", company: "" });
+        setSubmitted(false);
+        setTouched({});
       } catch {
         setStatus({
           kind: "error",
@@ -139,6 +147,7 @@ export function ContactForm({
               <input
                 id="name"
                 autoComplete="name"
+                required
                 value={form.name}
                 onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
                 onBlur={() => setTouched((t) => ({ ...t, name: true }))}
@@ -157,7 +166,9 @@ export function ContactForm({
               </label>
               <input
                 id="email"
+                type="email"
                 autoComplete="email"
+                required
                 value={form.email}
                 onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
                 onBlur={() => setTouched((t) => ({ ...t, email: true }))}
@@ -194,6 +205,7 @@ export function ContactForm({
               </label>
               <textarea
                 id="message"
+                required
                 value={form.message}
                 onChange={(e) =>
                   setForm((p) => ({ ...p, message: e.target.value }))

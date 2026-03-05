@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { writeFile } from "node:fs/promises";
 import nodemailer from "nodemailer";
-import type { ContactLead } from "@/lib/validation";
+import type { ContactLead } from "@/features/contact/lib/validation";
 
 export type EmailProvider = "resend" | "smtp" | "tmp";
 

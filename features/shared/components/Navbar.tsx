@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { siteConfig } from "@/lib/site";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { siteConfig } from "@/features/shared/lib/site";
+import { ThemeToggle } from "@/features/shared/components/ThemeToggle";
 
 export interface NavLink {
   label: string;
@@ -70,4 +70,3 @@ export function Navbar() {
     </header>
   );
 }
-
