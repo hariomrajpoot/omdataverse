@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="80" viewBox="0 0 240 80" fill="none">
+  <rect width="240" height="80" rx="14" fill="#001A33"/>
+  <circle cx="70" cy="40" r="18" stroke="#FFFFFF" stroke-width="3" opacity="0.9"/>
+  <path d="M60 52V28l24 24V28" stroke="#00A4EF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="118" y="49" font-family="Segoe UI, Arial, sans-serif" font-size="22" fill="#FFFFFF" opacity="0.92">Next.js</text>
+</svg>
+

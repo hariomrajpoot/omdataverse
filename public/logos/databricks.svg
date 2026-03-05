@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="Databricks">
+  <g fill="none" stroke="#FF3621" stroke-width="2.2" stroke-linejoin="round">
+    <path d="M12 18l12-6 12 6-12 6-12-6Z" />
+    <path d="M12 25l12-6 12 6-12 6-12-6Z" opacity="0.9" />
+    <path d="M12 32l12-6 12 6-12 6-12-6Z" opacity="0.8" />
+  </g>
+</svg>
+

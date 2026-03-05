@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="Azure OpenAI">
+  <defs>
+    <linearGradient id="az" x1="14" y1="10" x2="34" y2="38" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#00A4EF" />
+      <stop offset="1" stop-color="#0078D4" />
+    </linearGradient>
+  </defs>
+
+  <!-- Azure mark -->
+  <path d="M24 7 10 33h10l8-18h10L24 7Z" fill="url(#az)" />
+
+  <!-- "AI" spark -->
+  <g fill="none" stroke="#93C5FD" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.95">
+    <path d="M33.5 26.5l2.8-1.2-1.2 2.8 1.2 2.8-2.8-1.2-2.8 1.2 1.2-2.8-1.2-2.8 2.8 1.2Z" />
+  </g>
+</svg>
+

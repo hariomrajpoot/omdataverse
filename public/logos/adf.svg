@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="Azure Data Factory">
+  <path
+    d="M24 6 8 14.5l16 27L40 14.5 24 6Z"
+    fill="#0078D4"
+    opacity="0.95"
+  />
+  <path
+    d="M24 11 13 16.9 24 35l11-18.1L24 11Z"
+    fill="#00A4EF"
+  />
+  <path
+    d="M15.2 29.2h17.6M18 34.2h12"
+    stroke="#E6F4FF"
+    stroke-width="2"
+    stroke-linecap="round"
+    opacity="0.9"
+  />
+</svg>
+

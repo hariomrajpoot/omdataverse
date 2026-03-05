@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="Microsoft Fabric">
+  <defs>
+    <linearGradient id="fabricA" x1="10" y1="8" x2="36" y2="40" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7C3AED" />
+      <stop offset="0.55" stop-color="#2563EB" />
+      <stop offset="1" stop-color="#06B6D4" />
+    </linearGradient>
+    <linearGradient id="fabricB" x1="14" y1="10" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#A78BFA" />
+      <stop offset="1" stop-color="#38BDF8" />
+    </linearGradient>
+  </defs>
+
+  <path
+    d="M14 12.5c0-2 1.6-3.5 3.6-3.5h10.8c2 0 3.6 1.5 3.6 3.5v4c0 2-1.6 3.5-3.6 3.5H17.6c-2 0-3.6-1.5-3.6-3.5v-4Z"
+    fill="url(#fabricA)"
+  />
+  <path
+    d="M12 22.5c0-2 1.6-3.5 3.6-3.5h14.8c2 0 3.6 1.5 3.6 3.5v4c0 2-1.6 3.5-3.6 3.5H15.6c-2 0-3.6-1.5-3.6-3.5v-4Z"
+    fill="url(#fabricB)"
+    opacity="0.95"
+  />
+  <path
+    d="M16 32.5c0-2 1.6-3.5 3.6-3.5h10.8c2 0 3.6 1.5 3.6 3.5v4c0 2-1.6 3.5-3.6 3.5H19.6c-2 0-3.6-1.5-3.6-3.5v-4Z"
+    fill="url(#fabricA)"
+    opacity="0.92"
+  />
+</svg>
+
