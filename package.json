@@ -9,17 +9,27 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "seed:content": "tsx scripts/seed-content.ts",
+    "sanity": "sanity dev",
     "test": "jest"
   },
   "dependencies": {
+    "@radix-ui/react-slot": "^1.2.4",
     "@sanity/client": "^7.16.0",
     "@sanity/vision": "^5.13.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.35.1",
+    "gsap": "^3.14.2",
+    "lenis": "^1.3.18",
+    "lucide-react": "^0.577.0",
     "next": "16.1.6",
     "next-sanity": "^12.1.0",
     "nodemailer": "^8.0.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "sanity": "^5.13.0",
+    "styled-components": "^6.3.11",
+    "tailwind-merge": "^3.5.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {

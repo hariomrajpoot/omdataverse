@@ -5,6 +5,7 @@ import { Navbar } from "@/features/shared/components/Navbar";
 import { Footer } from "@/features/shared/components/Footer";
 import { siteConfig } from "@/features/shared/lib/site";
 import { DebugHydrationProbe } from "@/features/shared/components/DebugHydrationProbe";
+import { LenisProvider } from "@/components/LenisProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -108,9 +109,11 @@ export default function RootLayout({
         ) : null}
         <div className="flex min-h-dvh flex-col">
           <Navbar />
-          <main id="main" className="flex-1">
-            {children}
-          </main>
+          <LenisProvider>
+            <main id="main" className="flex-1">
+              {children}
+            </main>
+          </LenisProvider>
           <Footer />
         </div>
       </body>

@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { Hero } from "@/components/Hero";
-import { ServicesGrid } from "@/components/ServicesGrid";
+import { BentoGrid } from "@/components/BentoGrid";
+import { AISolutions } from "@/components/AISolutions";
 import { TechStack } from "@/components/TechStack";
+import { MetricsSection } from "@/components/MetricsSection";
 import { CaseStudyCard } from "@/components/CaseStudyCard";
 import { CTASection } from "@/components/CTASection";
 import { sanityFetch } from "@/lib/sanity/fetch";
@@ -24,8 +26,8 @@ export default async function Home() {
   return (
     <div>
       <Hero
-        title="Accelerate Your Intelligence. Build Your Enterprise Data Platform in Weeks, Not Months."
-        subtitle="We specialize in the Microsoft Cloud ecosystem—leveraging Fabric, Azure, and Databricks to architect high-performance data estates. From Genetic Data Analysis to custom AI agents, we bridge raw data to autonomous intelligence."
+        title="Accelerate Your Data Platform"
+        subtitle="Transform raw data into autonomous intelligence with Microsoft Cloud expertise"
         primaryCta={{ label: "Book a Strategy Audit", href: "/contact?intent=audit" }}
         secondaryCta={{ label: "View our services", href: "/services" }}
       />
@@ -81,11 +83,17 @@ export default async function Home() {
 
       <TechStack />
 
-      <ServicesGrid
+      <BentoGrid
         title="Services overview"
         subtitle="Four practice areas that map to real delivery milestones—foundation to production."
         services={services}
       />
+
+      <AISolutions />
+
+      <TechStack />
+
+      <MetricsSection />
 
       <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-16">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">

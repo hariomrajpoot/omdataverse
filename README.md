@@ -1,36 +1,311 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# OmDataverse - AI Consulting Website
 
-## Getting Started
+## Project Overview
 
-First, run the development server:
+This is a modern, enterprise-ready AI consulting website built with Next.js 16. It showcases services for building data platforms using Microsoft Cloud technologies like Fabric, Azure, and Databricks. The site includes a contact form, case studies, services pages, and integrates with Sanity CMS for content management.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+As a beginner-friendly project, this README will explain how everything works step by step, including Next.js fundamentals, component usage, and API calls.
+
+## Tech Stack
+
+- **Next.js 16** - React framework with App Router
+- **React 19** - UI library
+- **TypeScript** - Type-safe JavaScript
+- **Tailwind CSS** - Utility-first CSS framework
+- **Sanity CMS** - Headless content management system
+- **Jest** - Testing framework
+- **ESLint** - Code linting
+- **Prettier** - Code formatting
+
+## How Next.js Works in This Project
+
+Next.js is a React framework that makes building web applications easier. Here's how it works here:
+
+### 1. App Router
+This project uses Next.js 16's **App Router** (in the `app/` directory). Unlike the older Pages Router, App Router uses:
+- `layout.tsx` - Shared layout for all pages
+- `page.tsx` - Individual page components
+- `route.ts` - API endpoints
+
+### 2. File-Based Routing
+- `app/page.tsx` → Home page (`/`)
+- `app/about/page.tsx` → About page (`/about`)
+- `app/contact/page.tsx` → Contact page (`/contact`)
+- `app/api/contact/route.ts` → API endpoint (`/api/contact`)
+
+### 3. Server Components vs Client Components
+- **Server Components** (default): Run on the server, can fetch data directly
+- **Client Components**: Use `"use client"` directive, run in browser
+
+### 4. Data Fetching
+- Server components can use `async/await` to fetch data
+- Uses Sanity CMS for content, with fallback to mock data
+
+## Project Structure
+
+```
+├── app/                    # Next.js App Router
+│   ├── layout.tsx         # Root layout (shared header/footer)
+│   ├── page.tsx           # Home page
+│   ├── globals.css        # Global styles
+│   ├── about/page.tsx     # About page
+│   ├── contact/page.tsx   # Contact page
+│   └── api/               # API routes
+│       └── contact/route.ts
+├── components/            # Reusable UI components
+│   ├── Hero.tsx          # Hero section
+│   ├── ServicesGrid.tsx  # Services display
+│   └── ...
+├── features/             # Feature-based organization
+│   ├── shared/           # Shared components & utilities
+│   ├── contact/          # Contact feature
+│   └── ...
+├── lib/                  # Utility libraries
+│   ├── sanity/           # Sanity CMS integration
+│   ├── utils.ts          # Helper functions
+│   └── types.ts          # TypeScript types
+├── sanity/               # Sanity CMS configuration
+└── public/               # Static assets
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## How Components Work
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Components are reusable pieces of UI. Here's how they're used:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 1. Importing Components
+```tsx
+import { Hero } from "@/components/Hero";
+import { ServicesGrid } from "@/components/ServicesGrid";
+```
 
-## Learn More
+The `@/` is an alias for the project root (configured in `tsconfig.json`).
 
-To learn more about Next.js, take a look at the following resources:
+### 2. Using Components in Pages
+In `app/page.tsx`:
+```tsx
+export default async function Home() {
+  // Fetch data from Sanity or use mock data
+  const services = await sanityFetch({ query: servicesQuery });
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+  return (
+    <div>
+      <Hero title="..." subtitle="..." primaryCta={...} />
+      <ServicesGrid services={services} />
+    </div>
+  );
+}
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 3. Component Props
+Components receive data via props:
+```tsx
+interface HeroProps {
+  title: string;
+  subtitle: string;
+  primaryCta: { label: string; href: string };
+}
 
-## Deploy on Vercel
+export function Hero({ title, subtitle, primaryCta }: HeroProps) {
+  return (
+    <h1>{title}</h1>
+    <p>{subtitle}</p>
+    <Link href={primaryCta.href}>{primaryCta.label}</Link>
+  );
+}
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 4. Client Components
+Some components need browser features (like event handlers):
+```tsx
+"use client";
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+import { useState } from "react";
+
+export function ContactForm() {
+  const [name, setName] = useState("");
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input value={name} onChange={(e) => setName(e.target.value)} />
+    </form>
+  );
+}
+```
+
+## How APIs Work
+
+APIs in Next.js are defined in `app/api/` directory.
+
+### 1. API Route Structure
+`app/api/contact/route.ts` defines the `/api/contact` endpoint.
+
+### 2. HTTP Methods
+```tsx
+export async function POST(req: Request) {
+  // Handle POST requests to /api/contact
+}
+
+export async function OPTIONS() {
+  // Handle CORS preflight requests
+}
+```
+
+### 3. Calling APIs from Components
+From a client component:
+```tsx
+"use client";
+
+async function submitForm(data) {
+  const response = await fetch("/api/contact", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+  const result = await response.json();
+  // Handle response
+}
+```
+
+### 4. API Flow for Contact Form
+1. User fills contact form
+2. Form submits to `/api/contact`
+3. API validates data with Zod schema
+4. Saves to Sanity CMS
+5. Sends email via Resend
+6. Returns success/error response
+
+## Setup and Installation
+
+### Prerequisites
+- Node.js 18+
+- npm, yarn, or pnpm
+
+### 1. Install Dependencies
+```bash
+npm install
+```
+
+### 2. Environment Variables
+Create `.env.local`:
+```env
+# Sanity CMS
+SANITY_PROJECT_ID=your_project_id
+SANITY_DATASET=production
+SANITY_API_TOKEN=your_write_token
+
+# Email (Resend)
+RESEND_API_KEY=your_resend_key
+
+# Optional
+NEXT_PUBLIC_PLAUSIBLE=your_domain
+```
+
+### 3. Sanity Setup
+1. Create project at https://sanity.io
+2. Add schemas from `sanity/schemaTypes/`
+3. Configure tokens in Sanity dashboard
+
+### 4. Seed Content (Optional)
+```bash
+npm run seed:content
+```
+
+## Running the Project
+
+### Development
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000)
+
+### Build for Production
+```bash
+npm run build
+npm start
+```
+
+### Testing
+```bash
+npm test
+```
+
+### Linting & Formatting
+```bash
+npm run lint
+npm run format
+```
+
+## Key Features Explained
+
+### 1. Content Management with Sanity
+- Case studies, services stored in Sanity
+- Automatic fallback to mock data if Sanity not configured
+- Real-time content updates
+
+### 2. Contact Form
+- Client-side validation with Zod
+- Rate limiting to prevent spam
+- Saves to Sanity + sends email
+- CORS enabled for cross-origin requests
+
+### 3. Responsive Design
+- Mobile-first with Tailwind CSS
+- Dark mode support
+- Accessible components
+
+### 4. SEO & Performance
+- Server-side rendering
+- Optimized fonts
+- Open Graph meta tags
+- Sitemap generation
+
+### 5. Type Safety
+- Full TypeScript coverage
+- Zod schemas for API validation
+- Strict type checking
+
+## Learning Next.js Concepts
+
+### Server vs Client Components
+- **Server**: Data fetching, no interactivity
+- **Client**: Event handlers, state management
+
+### Routing
+- File-based: `app/page.tsx` = `/`
+- Dynamic: `app/case-studies/[slug]/page.tsx` = `/case-studies/my-case`
+
+### Data Fetching
+- Server components: Direct database/API calls
+- Client components: `useEffect` + `fetch`
+
+### Styling
+- Tailwind utility classes
+- CSS variables for theming
+- Responsive design with `sm:`, `lg:` prefixes
+
+## Next Steps for Beginners
+
+1. **Read the code**: Start with `app/page.tsx` and `components/Hero.tsx`
+2. **Try modifying**: Change text in Hero component
+3. **Add a page**: Create `app/test/page.tsx`
+4. **Build a component**: Add a new reusable component
+5. **Learn React**: Focus on hooks, props, state
+6. **Explore APIs**: Look at contact form submission
+
+## Contributing
+
+1. Fork the repository
+2. Create feature branch
+3. Make changes
+4. Run tests: `npm test`
+5. Submit pull request
+
+## Deployment
+
+Deploy to Vercel, Netlify, or any Node.js hosting:
+```bash
+npm run build
+```
+
+The app is production-ready with optimized builds, static generation, and CDN-ready assets.
