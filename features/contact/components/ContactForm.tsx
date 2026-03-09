@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useMemo, useState } from "react";
 import { contactLeadSchema, type ContactLead } from "@/features/contact/lib/validation";
 import { cn } from "@/features/shared/lib/utils";
 
@@ -18,7 +18,10 @@ export function ContactForm({
   heading = "Contact",
   subheading = "Tell us what you’re building. We’ll respond within 1–2 business days.",
 }: ContactFormProps) {
-  const [isPending, startTransition] = useTransition();
+  // when the form is submitted successfully we redirect the user to
+  // WhatsApp with a prefilled message so that the admin phone number
+  // (configured in env) receives the message.
+  const whatsAppPhone = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "919754799646";
   const [status, setStatus] = useState<Status>({ kind: "idle" });
   const [submitted, setSubmitted] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
@@ -31,13 +34,6 @@ export function ContactForm({
   }));
 
   const parsed = useMemo(() => contactLeadSchema.safeParse(form), [form]);
-
-  useEffect(() => {
-    if (status.kind === "success") {
-      const timer = setTimeout(() => setStatus({ kind: "idle" }), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [status]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -52,38 +48,22 @@ export function ContactForm({
       return;
     }
 
-    startTransition(async () => {
-      try {
-        const res = await fetch("/api/contact", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify(parsed.data),
-        });
+    // prepare whatsapp redirection; we include all fields so the
+    // admin sees the form details. the `whatsAppPhone` constant is
+    // declared outside this callback.
+    const message = `Name: ${parsed.data.name}\nEmail: ${parsed.data.email}\nCompany: ${parsed.data.company || "(none)"}\nMessage: ${parsed.data.message}`;
+    const waHref = `https://wa.me/${whatsAppPhone}?text=${encodeURIComponent(
+      message
+    )}`;
+    // perform the redirect; user will land in WhatsApp (web or app)
+    window.location.href = waHref;
 
-        const data = (await res.json().catch(() => null)) as
-          | { ok: true; message: string }
-          | { ok: false; error: string }
-          | null;
-
-        if (!res.ok || !data || data.ok !== true) {
-          setStatus({
-            kind: "error",
-            message: data && "error" in data ? data.error : "Something went wrong.",
-          });
-          return;
-        }
-
-        setStatus({ kind: "success", message: data.message });
-        setForm({ name: "", email: "", message: "", company: "" });
-        setSubmitted(false);
-        setTouched({});
-      } catch {
-        setStatus({
-          kind: "error",
-          message: "Network error. Please try again in a moment.",
-        });
-      }
-    });
+    // we still clear the local form state so if the user navigates back
+    // the inputs are blank.
+    setStatus({ kind: "success", message: "Redirecting to WhatsApp..." });
+    setForm({ name: "", email: "", message: "", company: "" });
+    setSubmitted(false);
+    setTouched({});
   }
 
   const fieldError = (path: keyof ContactLead) => {
@@ -230,14 +210,13 @@ export function ContactForm({
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <button
               type="submit"
-              disabled={isPending}
               className={cn(
-                "inline-flex h-11 items-center justify-center rounded-md bg-brand-primary px-5 text-sm font-semibold text-brand-onPrimary shadow-sm shadow-black/10 transition",
-                "hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70",
+                "inline-flex h-11 items-center justify-center rounded-md bg-green-500 px-5 text-sm font-semibold text-white shadow-sm shadow-black/10 transition",
+                "hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-70",
                 "hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-brand-bg",
               )}
             >
-              {isPending ? "Sending…" : "Send message"}
+              Send on WhatsApp
             </button>
             <div aria-live="polite" className="text-sm">
               {status.kind === "success" ? (

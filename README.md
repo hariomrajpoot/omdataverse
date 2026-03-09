@@ -199,6 +199,14 @@ RESEND_API_KEY=your_resend_key
 
 # Optional
 NEXT_PUBLIC_PLAUSIBLE=your_domain
+
+# optionally provide a WhatsApp number to enable chat features
+NEXT_PUBLIC_WHATSAPP_NUMBER=919754799646  # your WhatsApp number in international format (country code + number, no plus or separators)
+
+# use free endpoints only
+# the contact form will redirect to WhatsApp via wa.me, which is a free service.
+# the backend email send uses whatever SMTP/Resend provider you configure;
+# no paid API is required – omit RESEND_API_KEY/SMTP_URL to skip email entirely.
 ```
 
 ### 3. Sanity Setup

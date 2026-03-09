@@ -5,6 +5,7 @@ import { Navbar } from "@/features/shared/components/Navbar";
 import { Footer } from "@/features/shared/components/Footer";
 import { siteConfig } from "@/features/shared/lib/site";
 import { DebugHydrationProbe } from "@/features/shared/components/DebugHydrationProbe";
+import { WhatsAppFloatingButton } from "@/features/shared/components/WhatsAppFloatingButton";
 import { LenisProvider } from "@/components/LenisProvider";
 
 const geistSans = Geist({
@@ -115,6 +116,8 @@ export default function RootLayout({
             </main>
           </LenisProvider>
           <Footer />
+          {/* floating chat button is rendered globally; the link is configured via env */}
+          <WhatsAppFloatingButton />
         </div>
       </body>
     </html>
