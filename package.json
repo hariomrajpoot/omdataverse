@@ -13,6 +13,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@google/genai": "^1.45.0",
     "@radix-ui/react-slot": "^1.2.4",
     "@sanity/client": "^7.16.0",
     "@sanity/vision": "^5.13.0",
@@ -27,7 +28,10 @@
     "nodemailer": "^8.0.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "sanity": "^5.13.0",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
+    "resend": "^6.9.3",
+    "sanity": "^5.16.0",
     "styled-components": "^6.3.11",
     "tailwind-merge": "^3.5.0",
     "zod": "^4.3.6"

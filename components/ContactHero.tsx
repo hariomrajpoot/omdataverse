@@ -82,7 +82,7 @@ export function ContactHero() {
             transition={{ delay: 0.2, duration: 0.6 }}
           >
             <Badge variant="secondary" className="mb-6 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-slate-200 dark:border-slate-700">
-              Let's Talk
+              Let&apos;s Talk
             </Badge>
           </motion.div>
 
@@ -101,7 +101,7 @@ export function ContactHero() {
             transition={{ delay: 0.6, duration: 0.8 }}
             className="text-xl leading-8 text-slate-600 dark:text-slate-300 max-w-2xl mx-auto mb-12"
           >
-            Get in touch with our team. Whether you need a quick consultation or want to explore a full implementation, we're here to help.
+            Get in touch with our team. Whether you need a quick consultation or want to explore a full implementation, we&apos;re here to help.
           </motion.p>
 
           {/* Contact Methods */}

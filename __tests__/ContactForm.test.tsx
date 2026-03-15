@@ -24,8 +24,8 @@ describe("ContactForm", () => {
 
     // replace location.assign so we can observe navigations
     const originalLocation = window.location;
-    delete (window as any).location;
-    (window as any).location = { href: "", assign: jest.fn() };
+    delete (window as unknown as Record<string, unknown>).location;
+    (window as unknown as Record<string, unknown>).location = { href: "", assign: jest.fn() };
 
     render(<ContactForm />);
 
@@ -39,7 +39,7 @@ describe("ContactForm", () => {
     expect(window.location.href).toMatch(/^https:\/\/wa\.me\//);
 
     // restore original location object
-    (window as any).location = originalLocation;
+    (window as unknown as Record<string, unknown>).location = originalLocation;
   });
 });
 

@@ -18,7 +18,6 @@ async function main() {
   const token = process.env.SANITY_WRITE_TOKEN;
 
   if (!token) {
-    // eslint-disable-next-line no-console
     console.log(
       "SANITY_WRITE_TOKEN not set. Skipping Sanity seeding.\n" +
         "You can still run the website using local mock data.\n" +
@@ -89,12 +88,10 @@ async function main() {
     });
   }
 
-  // eslint-disable-next-line no-console
   console.log("Seeded Sanity content successfully.");
 }
 
 main().catch((err) => {
-  // eslint-disable-next-line no-console
   console.error(err);
   process.exit(1);
 });

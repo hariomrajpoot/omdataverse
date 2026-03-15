@@ -84,12 +84,12 @@ export function BentoGrid({ title, subtitle, services }: BentoGridProps) {
             className="text-center max-w-3xl mx-auto mb-16"
           >
             {title && (
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-slate-900 dark:text-white mb-6">
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-brand-fg mb-6">
                 {title}
               </h2>
             )}
             {subtitle && (
-              <p className="text-lg leading-8 text-slate-600 dark:text-slate-300">
+              <p className="text-lg leading-8 text-brand-muted">
                 {subtitle}
               </p>
             )}
@@ -158,7 +158,7 @@ export function BentoGrid({ title, subtitle, services }: BentoGridProps) {
           )}
 
           {/* Medium cards */}
-          {services.slice(1, 3).map((service, index) => (
+          {services.slice(1, 3).map((service) => (
             <motion.div
               key={service.slug}
               variants={itemVariants}
@@ -203,7 +203,7 @@ export function BentoGrid({ title, subtitle, services }: BentoGridProps) {
           ))}
 
           {/* Small cards */}
-          {services.slice(3).map((service, index) => (
+          {services.slice(3).map((service) => (
             <motion.div
               key={service.slug}
               variants={itemVariants}

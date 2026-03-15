@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/features/shared/components/Navbar";
-import { Footer } from "@/features/shared/components/Footer";
+import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 import { siteConfig } from "@/features/shared/lib/site";
 import { DebugHydrationProbe } from "@/features/shared/components/DebugHydrationProbe";
 import { WhatsAppFloatingButton } from "@/features/shared/components/WhatsAppFloatingButton";
-import { LenisProvider } from "@/components/LenisProvider";
+import { ChatWidget } from "@/components/chatbot/ChatWidget";
+import { LenisProvider } from "@/components/layout/LenisProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -118,6 +119,7 @@ export default function RootLayout({
           <Footer />
           {/* floating chat button is rendered globally; the link is configured via env */}
           <WhatsAppFloatingButton />
+          <ChatWidget />
         </div>
       </body>
     </html>

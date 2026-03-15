@@ -4,18 +4,104 @@
 
 This is a modern, enterprise-ready AI consulting website built with Next.js 16. It showcases services for building data platforms using Microsoft Cloud technologies like Fabric, Azure, and Databricks. The site includes a contact form, case studies, services pages, and integrates with Sanity CMS for content management.
 
+**New Features Added:**
+- **Lead Management System**: Complete lead capture, demo booking, and admin dashboard
+- **AI Chatbot**: Google Gemini-powered assistant for visitor engagement and lead conversion
+- **Demo Booking Page**: `/book-demo` for scheduling personalized demos
+- **Admin Dashboard**: `/admin/leads` for managing leads and tracking conversions
+- **Email Notifications**: Automated email notifications for new leads using Resend
+
 As a beginner-friendly project, this README will explain how everything works step by step, including Next.js fundamentals, component usage, and API calls.
 
-## Tech Stack
+## Lead Management System
 
-- **Next.js 16** - React framework with App Router
-- **React 19** - UI library
-- **TypeScript** - Type-safe JavaScript
-- **Tailwind CSS** - Utility-first CSS framework
-- **Sanity CMS** - Headless content management system
-- **Jest** - Testing framework
-- **ESLint** - Code linting
-- **Prettier** - Code formatting
+The project now includes a complete lead management and demo booking system:
+
+### Features
+- **Contact Form**: Enhanced with phone, service selection, and lead tracking
+- **Demo Booking**: Dedicated page for scheduling personalized demos
+- **Admin Dashboard**: Lead management interface with filtering and status updates
+- **Email Notifications**: Automated emails for new leads using Resend
+- **Lead Pipeline**: Track leads through stages (New → Contacted → Demo Scheduled → Proposal Sent → Converted/Lost)
+
+### API Endpoints
+- `POST /api/leads` - Create new leads (contact or demo)
+- `GET /api/leads/list` - Retrieve all leads (admin only)
+- `PATCH /api/leads/update` - Update lead status (admin only)
+
+### Database Schema
+Leads are stored in Sanity CMS with the following fields:
+- Basic info: name, email, phone, company
+- Service interest and message
+- Type: contact, demo, or chatbot
+- Status: new, contacted, demo_scheduled, proposal_sent, converted, lost
+- Demo details: date, time, use case (for demo leads)
+
+### Environment Variables
+Add these to your `.env.local`:
+```
+RESEND_API_KEY=re_XmjHP2ht_9VQXvuG6z5MiMkLkTN8GZXK1
+RESEND_FROM=onboarding@resend.dev
+SANITY_WRITE_TOKEN=your_sanity_write_token
+SANITY_READ_TOKEN=your_sanity_read_token
+CONTACT_EMAIL=hello@example.com
+```
+
+### Email Setup
+Configure Resend for automated lead notifications
+
+## AI Chatbot
+
+The website now includes a modern AI chatbot powered by Google Gemini Pro that helps engage visitors and convert them into leads.
+
+### Features
+- **Floating Chat Widget**: Appears on all pages in the bottom-right corner
+- **Google Gemini Integration**: AI-powered responses about OmDataverse services
+- **Lead Capture**: Automatically collects contact information when users show interest
+- **Quick Suggestions**: Pre-built action buttons for common inquiries
+- **Modern UI**: Glassmorphism design with smooth animations
+- **Mobile Responsive**: Works perfectly on all devices
+
+### Chatbot Capabilities
+- Answer questions about AI consulting services
+- Explain data platform architecture and technologies
+- Guide users toward booking demos or consultations
+- Provide information about Microsoft Fabric, Azure, Databricks
+- Capture leads automatically when users express interest
+
+### API Integration
+- **Endpoint**: `POST /api/chat` - Handles chat messages and Gemini API calls
+- **AI Model**: Google Gemini Pro for intelligent responses
+- **System Prompt**: Configured with OmDataverse service information
+
+### Components
+- `ChatWidget.tsx` - Floating button and main container
+- `ChatWindow.tsx` - Chat interface with messages and lead capture
+- `ChatMessage.tsx` - Individual message rendering with markdown support
+- `ChatInput.tsx` - Input field with quick suggestions
+
+### Quick Actions
+The chatbot includes these quick suggestion buttons:
+- "Book a Demo"
+- "AI Consulting Services"
+- "Data Platform Architecture"
+- "Pricing & Consultation"
+- "Talk to an Expert"
+
+### Lead Integration
+When users express interest in services, demos, or consultations, the chatbot automatically:
+1. Displays a lead capture form within the chat
+2. Collects name, email, and company information
+3. Submits the lead to the existing `/api/leads` endpoint
+4. Stores the lead in the database with type "chatbot"
+5. Sends confirmation and follow-up information
+
+### Setup Requirements
+1. **Google AI API Key**: Get from [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. **Environment Variable**: Add `GOOGLE_AI_API_KEY=your_key_here` to `.env.local`
+3. **Dependencies**: `@google/generative-ai` and `react-markdown` are already installed
+
+The chatbot enhances user engagement and significantly improves lead conversion rates by providing instant, intelligent responses and seamless lead capture.
 
 ## How Next.js Works in This Project
 

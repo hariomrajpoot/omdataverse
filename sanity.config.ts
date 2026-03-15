@@ -3,7 +3,7 @@ import { deskTool } from "sanity/desk";
 import { visionTool } from "@sanity/vision";
 import { schemaTypes } from "./sanity/schemaTypes";
 
-const projectId = process.env.SANITY_PROJECT_ID || "YOUR_PROJECT_ID";
+const projectId = process.env.SANITY_PROJECT_ID || "70i1fktj";
 const dataset = process.env.SANITY_DATASET || "production";
 
 export default defineConfig({

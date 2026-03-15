@@ -6,7 +6,7 @@ import { gsap } from "gsap";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Calendar, TrendingUp } from "lucide-react";
+import { ArrowRight, Calendar } from "lucide-react";
 import type { CaseStudy } from "@/lib/types";
 
 export interface CaseStudyCardProps {

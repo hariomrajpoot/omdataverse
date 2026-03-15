@@ -9,7 +9,7 @@ import { CTASection } from "@/components/CTASection";
 import { sanityFetch } from "@/lib/sanity/fetch";
 import { caseStudiesQuery, servicesQuery } from "@/lib/sanity/queries";
 import { isSanityConfigured, mockCaseStudies, mockServices } from "@/lib/mockData";
-import type { CaseStudy, Service } from "@/lib/types";
+import type { CaseStudy, Service } from "@/types";
 
 export default async function Home() {
   const useSanity = isSanityConfigured();

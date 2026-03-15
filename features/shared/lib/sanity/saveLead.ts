@@ -2,9 +2,9 @@ import "server-only";
 
 import { createClient } from "next-sanity";
 import { sanityEnv } from "@/features/shared/lib/sanity/env";
-import type { ContactLead } from "@/lib/validations";
+import type { Lead } from "@/features/shared/lib/validation";
 
-export async function saveContact(lead: ContactLead) {
+export async function saveLead(lead: Lead) {
   const projectId = sanityEnv.projectId;
   const dataset = sanityEnv.dataset;
   const writeToken = process.env.SANITY_WRITE_TOKEN;
@@ -14,7 +14,7 @@ export async function saveContact(lead: ContactLead) {
   }
 
   if (!writeToken) {
-    throw new Error("Sanity write token not configured: set SANITY_WRITE_TOKEN to enable contact storage");
+    throw new Error("Sanity write token not configured: set SANITY_WRITE_TOKEN to enable lead storage");
   }
 
   const client = createClient({
@@ -26,14 +26,19 @@ export async function saveContact(lead: ContactLead) {
   });
 
   const document = {
-    _type: "contact",
+    _type: "lead",
     name: lead.name,
     email: lead.email,
+    phone: lead.phone || null,
     company: lead.company || null,
-    message: lead.message,
-    submittedAt: new Date().toISOString(),
-    status: "new", // Can be: new, in-progress, resolved, spam
-    notes: "",
+    service: lead.service || null,
+    message: lead.message || null,
+    type: lead.type,
+    status: "new",
+    demoDate: lead.demoDate || null,
+    demoTime: lead.demoTime || null,
+    useCase: lead.useCase || null,
+    createdAt: new Date().toISOString(),
   };
 
   const result = await client.create(document);

@@ -1,44 +1,49 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { contactLeadSchema, type ContactLead } from "@/features/contact/lib/validation";
+import { leadSchema, type Lead } from "@/features/shared/lib/validation";
 import { cn } from "@/features/shared/lib/utils";
 
 export interface ContactFormProps {
   heading?: string;
   subheading?: string;
+  type?: "contact" | "demo";
 }
 
 type Status =
   | { kind: "idle" }
+  | { kind: "loading" }
   | { kind: "success"; message: string }
   | { kind: "error"; message: string };
 
 export function ContactForm({
   heading = "Contact",
   subheading = "Tell us what you’re building. We’ll respond within 1–2 business days.",
+  type = "contact",
 }: ContactFormProps) {
-  // when the form is submitted successfully we redirect the user to
-  // WhatsApp with a prefilled message so that the admin phone number
-  // (configured in env) receives the message.
-  const whatsAppPhone = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "919754799646";
   const [status, setStatus] = useState<Status>({ kind: "idle" });
   const [submitted, setSubmitted] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
-  const [form, setForm] = useState<ContactLead>(() => ({
+  const [form, setForm] = useState<Lead>(() => ({
     name: "",
     email: "",
-    message: "",
+    phone: "",
     company: "",
+    service: "",
+    message: "",
+    type,
+    demoDate: "",
+    demoTime: "",
+    useCase: "",
   }));
 
-  const parsed = useMemo(() => contactLeadSchema.safeParse(form), [form]);
+  const parsed = useMemo(() => leadSchema.safeParse(form), [form]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitted(true);
-    setStatus({ kind: "idle" });
+    setStatus({ kind: "loading" });
 
     if (!parsed.success) {
       setStatus({
@@ -48,31 +53,52 @@ export function ContactForm({
       return;
     }
 
-    // prepare whatsapp redirection; we include all fields so the
-    // admin sees the form details. the `whatsAppPhone` constant is
-    // declared outside this callback.
-    const message = `Name: ${parsed.data.name}\nEmail: ${parsed.data.email}\nCompany: ${parsed.data.company || "(none)"}\nMessage: ${parsed.data.message}`;
-    const waHref = `https://wa.me/${whatsAppPhone}?text=${encodeURIComponent(
-      message
-    )}`;
-    // perform the redirect; user will land in WhatsApp (web or app)
-    window.location.href = waHref;
+    try {
+      const response = await fetch("/api/leads", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(parsed.data),
+      });
 
-    // we still clear the local form state so if the user navigates back
-    // the inputs are blank.
-    setStatus({ kind: "success", message: "Redirecting to WhatsApp..." });
-    setForm({ name: "", email: "", message: "", company: "" });
-    setSubmitted(false);
-    setTouched({});
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to submit form");
+      }
+
+      setStatus({ kind: "success", message: result.message });
+      setForm({
+        name: "",
+        email: "",
+        phone: "",
+        company: "",
+        service: "",
+        message: "",
+        type,
+        demoDate: "",
+        demoTime: "",
+        useCase: "",
+      });
+      setSubmitted(false);
+      setTouched({});
+    } catch (error) {
+      console.error("Form submission error:", error);
+      setStatus({
+        kind: "error",
+        message: error instanceof Error ? error.message : "Something went wrong. Please try again.",
+      });
+    }
   }
 
-  const fieldError = (path: keyof ContactLead) => {
+  const fieldError = (path: keyof Lead) => {
     if (parsed.success) return undefined;
     const issue = parsed.error.issues.find((i) => i.path[0] === path);
     return issue?.message;
   };
 
-  const showErrorFor = (path: keyof ContactLead) =>
+  const showErrorFor = (path: keyof Lead) =>
     Boolean(submitted || touched[path]);
 
   const errorClass = (hasError: boolean) =>
@@ -122,7 +148,7 @@ export function ContactForm({
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="text-sm font-semibold text-brand-fg/80" htmlFor="name">
-                Name
+                Name *
               </label>
               <input
                 id="name"
@@ -142,7 +168,7 @@ export function ContactForm({
 
             <div>
               <label className="text-sm font-semibold text-brand-fg/80" htmlFor="email">
-                Email
+                Email *
               </label>
               <input
                 id="email"
@@ -161,9 +187,26 @@ export function ContactForm({
               ) : null}
             </div>
 
-            <div className="sm:col-span-2">
+            <div>
+              <label className="text-sm font-semibold text-brand-fg/80" htmlFor="phone">
+                Phone
+              </label>
+              <input
+                id="phone"
+                type="tel"
+                autoComplete="tel"
+                value={form.phone ?? ""}
+                onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
+                onBlur={() => setTouched((t) => ({ ...t, phone: true }))}
+                className={errorClass(Boolean(fieldError("phone")))}
+                placeholder="+1 (555) 123-4567"
+                aria-invalid={Boolean(fieldError("phone"))}
+              />
+            </div>
+
+            <div>
               <label className="text-sm font-semibold text-brand-fg/80" htmlFor="company">
-                Company (optional)
+                Company
               </label>
               <input
                 id="company"
@@ -180,27 +223,110 @@ export function ContactForm({
             </div>
 
             <div className="sm:col-span-2">
+              <label className="text-sm font-semibold text-brand-fg/80" htmlFor="service">
+                Service Interested
+              </label>
+              <select
+                id="service"
+                value={form.service ?? ""}
+                onChange={(e) => setForm((p) => ({ ...p, service: e.target.value }))}
+                onBlur={() => setTouched((t) => ({ ...t, service: true }))}
+                className={errorClass(Boolean(fieldError("service")))}
+                aria-invalid={Boolean(fieldError("service"))}
+              >
+                <option value="">Select a service</option>
+                <option value="data-platform">Data Platform</option>
+                <option value="ai-analytics">AI Analytics</option>
+                <option value="machine-learning">Machine Learning</option>
+                <option value="custom-ai">Custom AI Solutions</option>
+                <option value="consulting">Consulting</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            {type === "demo" && (
+              <>
+                <div>
+                  <label className="text-sm font-semibold text-brand-fg/80" htmlFor="demoDate">
+                    Preferred Date
+                  </label>
+                  <input
+                    id="demoDate"
+                    type="date"
+                    value={form.demoDate ?? ""}
+                    onChange={(e) => setForm((p) => ({ ...p, demoDate: e.target.value }))}
+                    onBlur={() => setTouched((t) => ({ ...t, demoDate: true }))}
+                    className={errorClass(Boolean(fieldError("demoDate")))}
+                    min={new Date().toISOString().split('T')[0]}
+                    aria-invalid={Boolean(fieldError("demoDate"))}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-semibold text-brand-fg/80" htmlFor="demoTime">
+                    Preferred Time
+                  </label>
+                  <select
+                    id="demoTime"
+                    value={form.demoTime ?? ""}
+                    onChange={(e) => setForm((p) => ({ ...p, demoTime: e.target.value }))}
+                    onBlur={() => setTouched((t) => ({ ...t, demoTime: true }))}
+                    className={errorClass(Boolean(fieldError("demoTime")))}
+                    aria-invalid={Boolean(fieldError("demoTime"))}
+                  >
+                    <option value="">Select time</option>
+                    <option value="9:00 AM">9:00 AM</option>
+                    <option value="10:00 AM">10:00 AM</option>
+                    <option value="11:00 AM">11:00 AM</option>
+                    <option value="1:00 PM">1:00 PM</option>
+                    <option value="2:00 PM">2:00 PM</option>
+                    <option value="3:00 PM">3:00 PM</option>
+                    <option value="4:00 PM">4:00 PM</option>
+                  </select>
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="text-sm font-semibold text-brand-fg/80" htmlFor="useCase">
+                    Use Case / Project Details
+                  </label>
+                  <textarea
+                    id="useCase"
+                    value={form.useCase ?? ""}
+                    onChange={(e) =>
+                      setForm((p) => ({ ...p, useCase: e.target.value }))
+                    }
+                    onBlur={() => setTouched((t) => ({ ...t, useCase: true }))}
+                    rows={4}
+                    className={errorClass(Boolean(fieldError("useCase")))}
+                    placeholder="Tell us about your specific use case or project requirements."
+                    aria-invalid={Boolean(fieldError("useCase"))}
+                  />
+                </div>
+              </>
+            )}
+
+            <div className="sm:col-span-2">
               <label className="text-sm font-semibold text-brand-fg/80" htmlFor="message">
-                Message
+                {type === "demo" ? "Additional Notes" : "Message"} *
               </label>
               <textarea
                 id="message"
                 required
-                value={form.message}
+                value={form.message ?? ""}
                 onChange={(e) =>
                   setForm((p) => ({ ...p, message: e.target.value }))
                 }
                 onBlur={() => setTouched((t) => ({ ...t, message: true }))}
                 rows={7}
                 className={errorClass(Boolean(fieldError("message")))}
-                placeholder="What are you trying to achieve? Include constraints, timelines, and where you are today."
+                placeholder={type === "demo" ? "Any additional questions or requirements?" : "What are you trying to achieve? Include constraints, timelines, and where you are today."}
                 aria-invalid={Boolean(fieldError("message"))}
               />
               {showErrorFor("message") && fieldError("message") ? (
                 <p className="mt-2 text-xs text-red-200">{fieldError("message")}</p>
               ) : (
                 <p className="mt-2 text-xs text-brand-fg/60">
-                  Minimum 20 characters. Please avoid sharing sensitive personal
+                  Minimum 10 characters. Please avoid sharing sensitive personal
                   or health information.
                 </p>
               )}
@@ -210,13 +336,14 @@ export function ContactForm({
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <button
               type="submit"
+              disabled={status.kind === "loading"}
               className={cn(
                 "inline-flex h-11 items-center justify-center rounded-md bg-green-500 px-5 text-sm font-semibold text-white shadow-sm shadow-black/10 transition",
                 "hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-70",
                 "hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-brand-bg",
               )}
             >
-              Send on WhatsApp
+              {status.kind === "loading" ? "Sending..." : "Send Message"}
             </button>
             <div aria-live="polite" className="text-sm">
               {status.kind === "success" ? (
@@ -227,7 +354,7 @@ export function ContactForm({
                 <span className="text-brand-fg/60">
                   Prefer email?{" "}
                   <a className="underline hover:text-brand-fg" href="mailto:hello@example.com">
-                    hello@example.com
+                    vivekrajput1924345@gmail.com
                   </a>
                 </span>
               )}

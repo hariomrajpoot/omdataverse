@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { leadSchema, sanitizeLead } from "@/lib/validations";
+import { leadSchema, sanitizeLead } from "@/features/shared/lib/validation";
 import { getClientIp, rateLimit } from "@/features/contact/lib/rateLimit";
 import { sendLead } from "@/features/shared/lib/email/sendLead";
 import { saveLead } from "@/features/shared/lib/sanity/saveLead";
@@ -9,7 +9,7 @@ export const runtime = "nodejs";
 function corsHeaders() {
   const headers = new Headers();
   headers.set("Access-Control-Allow-Origin", "*");
-  headers.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+  headers.set("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
   headers.set("Access-Control-Allow-Headers", "Content-Type");
   return headers;
 }
@@ -26,8 +26,8 @@ export async function POST(req: Request) {
 
   const ip = getClientIp(req.headers);
   const rl = rateLimit({
-    key: `contact:${ip}`,
-    limit: 5,
+    key: `lead:${ip}`,
+    limit: 10,
     windowMs: 10 * 60 * 1000,
   });
 
@@ -54,10 +54,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const parsed = leadSchema.safeParse({
-    ...(payload as Record<string, unknown>),
-    type: "contact" as const,
-  });
+  const parsed = leadSchema.safeParse(payload);
 
   if (!parsed.success) {
     return NextResponse.json(
@@ -77,10 +74,10 @@ export async function POST(req: Request) {
 
   try {
     // Save to Sanity first for guaranteed persistence
-    let contactId: string | null = null;
+    let leadId: string | null = null;
     try {
       const saved = await saveLead(lead);
-      contactId = saved.id;
+      leadId = saved.id;
     } catch (sanityErr) {
       console.error("Failed to save lead to Sanity:", sanityErr);
       // Continue to send email even if Sanity save fails
@@ -89,19 +86,23 @@ export async function POST(req: Request) {
     // Send email
     const emailResult = await sendLead(lead);
 
+    const message = lead.type === "demo"
+      ? "Thanks for your demo request! We'll be in touch soon to schedule your session."
+      : "Thanks—message received. We'll get back to you shortly.";
+
     return NextResponse.json(
       {
         ok: true,
-        message: "Thanks—message received. We'll get back to you shortly.",
+        message,
         provider: emailResult.provider,
-        contactId,
+        leadId,
       },
       { status: 200, headers }
     );
   } catch (err) {
     const message =
       err instanceof Error ? err.message : "Email delivery failed.";
-
+    console.error("Lead submission error:", err);
     return NextResponse.json(
       { ok: false, error: message },
       { status: 500, headers }

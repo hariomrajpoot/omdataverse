@@ -4,7 +4,8 @@ import os from "node:os";
 import path from "node:path";
 import { writeFile } from "node:fs/promises";
 import nodemailer from "nodemailer";
-import type { ContactLead } from "@/features/contact/lib/validation";
+import { Resend } from "resend";
+import type { Lead } from "@/features/shared/lib/validation";
 
 export type EmailProvider = "resend" | "smtp" | "tmp";
 
@@ -14,49 +15,62 @@ export interface SendLeadResult {
   savedTo?: string;
 }
 
-function renderText(lead: ContactLead) {
-  return [
-    "New contact form submission",
+function renderText(lead: Lead) {
+  const typeLabel = lead.type === "demo" ? "Demo Request" : lead.type === "contact" ? "Contact Form" : "Chatbot Lead";
+  const lines = [
+    `New ${typeLabel}`,
     "",
     `Name: ${lead.name}`,
     `Email: ${lead.email}`,
+    `Phone: ${lead.phone || "-"}`,
     `Company: ${lead.company || "-"}`,
-    "",
-    "Message:",
-    lead.message,
-  ].join("\n");
+  ];
+
+  if (lead.service) {
+    lines.push(`Service: ${lead.service}`);
+  }
+
+  if (lead.type === "demo") {
+    lines.push(`Demo Date: ${lead.demoDate || "-"}`);
+    lines.push(`Demo Time: ${lead.demoTime || "-"}`);
+    if (lead.useCase) {
+      lines.push("");
+      lines.push("Use Case / Project Details:");
+      lines.push(lead.useCase);
+    }
+  }
+
+  if (lead.message) {
+    lines.push("");
+    lines.push("Message:");
+    lines.push(lead.message);
+  }
+
+  return lines.join("\n");
 }
 
-export async function sendLead(lead: ContactLead): Promise<SendLeadResult> {
+export async function sendLead(lead: Lead): Promise<SendLeadResult> {
   const to = process.env.CONTACT_TO || process.env.CONTACT_EMAIL || "hello@example.com";
-  const subject = `New contact: ${lead.name}`;
+  const typeLabel = lead.type === "demo" ? "demo request" : lead.type === "contact" ? "contact" : "lead";
+  const subject = `New ${typeLabel}: ${lead.name}`;
   const text = renderText(lead);
 
   if (process.env.RESEND_API_KEY) {
+    const resend = new Resend(process.env.RESEND_API_KEY);
     const from = process.env.RESEND_FROM || "onboarding@resend.dev";
 
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    try {
+      const data = await resend.emails.send({
         from,
         to: [to],
         subject,
         text,
-        reply_to: lead.email,
-      }),
-    });
-
-    if (!res.ok) {
-      const body = await res.text().catch(() => "");
-      throw new Error(`Resend failed (${res.status}): ${body}`);
+        replyTo: lead.email,
+      });
+      return { provider: "resend", messageId: data.data?.id };
+    } catch (error) {
+      throw new Error(`Resend failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
-
-    const data = (await res.json().catch(() => null)) as { id?: string } | null;
-    return { provider: "resend", messageId: data?.id };
   }
 
   if (process.env.SMTP_URL) {

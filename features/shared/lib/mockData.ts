@@ -1,4 +1,4 @@
-import type { CaseStudy, Service, TeamMember, SiteSettings } from "./types";
+import type { CaseStudy, Service, TeamMember, SiteSettings } from "@/lib/types";
 
 export const mockSiteSettings: SiteSettings = {
   companyName: "OM Dataverse",
