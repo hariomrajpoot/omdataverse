@@ -1,263 +1,111 @@
-# Contact Form Setup Guide
+# Backend Setup — Database & Authentication
 
-This guide walks you through setting up the contact form with email and database storage using Sanity CMS and Resend.
+This project uses a **self-hosted backend**: PostgreSQL via **Prisma ORM**, with
+a custom **hybrid JWT + database-session** authentication system and
+**role-based access control** (ADMIN / CLIENT). Sanity.io has been fully removed.
 
 ## Prerequisites
 
-- Node.js 18+ installed
-- Existing Sanity project (or create one at https://sanity.io)
-- Resend account (or SMTP credentials)
+- Node.js 18+
+- A PostgreSQL database (local, Neon, Supabase, RDS, etc.)
 
-## Step 1: Sanity Configuration
+## Step 1 — Environment variables
 
-### 1.1 Get Your Sanity Credentials
-
-1. Go to https://manage.sanity.io
-2. Select your project
-3. Navigate to **Settings → API**
-4. Copy these values:
-   - **Project ID** (under API Settings)
-   - **Dataset name** (usually `production`)
-
-### 1.2 Create API Tokens
-
-1. Click **Tokens** in the API section
-2. **Create new token** with these settings:
-   - Name: "Contact Form Write Token"
-   - Permissions: `Editor` (to write documents)
-   - Copy the token value
-
-3. (Optional) Create another token for reading:
-   - Name: "Contact Form Read Token"
-   - Permissions: `Viewer`
-
-### 1.3 Create Contact Schema in Sanity Studio
-
-In your Sanity project directory, create a new schema file:
-
-**`schemas/contact.ts`** (or `.js`):
-
-```typescript
-export default {
-  name: "contact",
-  title: "Contact Submission",
-  type: "document",
-  fields: [
-    {
-      name: "name",
-      title: "Name",
-      type: "string",
-      validation: (Rule) => Rule.required().min(2).max(80),
-    },
-    {
-      name: "email",
-      title: "Email",
-      type: "string",
-      validation: (Rule) => Rule.required().email(),
-    },
-    {
-      name: "company",
-      title: "Company",
-      type: "string",
-    },
-    {
-      name: "message",
-      title: "Message",
-      type: "text",
-      validation: (Rule) => Rule.required().min(20).max(2000),
-    },
-    {
-      name: "submittedAt",
-      title: "Submitted At",
-      type: "datetime",
-      readOnly: true,
-    },
-    {
-      name: "status",
-      title: "Status",
-      type: "string",
-      options: {
-        list: [
-          { title: "New", value: "new" },
-          { title: "In Progress", value: "in-progress" },
-          { title: "Resolved", value: "resolved" },
-          { title: "Spam", value: "spam" },
-        ],
-      },
-      initialValue: "new",
-    },
-    {
-      name: "notes",
-      title: "Internal Notes",
-      type: "text",
-    },
-  ],
-};
-```
-
-Then register it in **`sanity.config.ts`**:
-
-```typescript
-import contact from './schemas/contact'
-
-export default defineConfig({
-  // ... other config
-  schema: {
-    types: [schemaTypes, contact], // Add contact here
-  },
-})
-```
-
-Finally, deploy to your Sanity Studio:
+Copy the template and fill in your values:
 
 ```bash
-sanity deploy
+cp .env.example .env
 ```
 
-## Step 2: Environment Configuration
+| Variable                     | Required | Notes                                                        |
+| ---------------------------- | -------- | ------------------------------------------------------------ |
+| `DATABASE_URL`               | ✅       | PostgreSQL connection string                                 |
+| `JWT_ACCESS_SECRET`          | ✅       | Long random string used to sign access-token JWTs            |
+| `ACCESS_TOKEN_TTL_SECONDS`   | –        | Access-token lifetime (default `900` = 15 min)               |
+| `REFRESH_TOKEN_TTL_SECONDS`  | –        | Refresh-token lifetime (default `2592000` = 30 days)         |
+| `RESEND_API_KEY`, `LEAD_NOTIFY_TO` | –  | Lead/contact email notifications (unchanged)                 |
 
-### 2.1 Copy Environment Template
+Generate a strong secret:
 
 ```bash
-cp .env.example .env.local
+node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 ```
 
-### 2.2 Fill in Your Credentials
+## Step 2 — Create the database schema
 
-Edit `.env.local` and add:
-
-```env
-# Sanity
-SANITY_PROJECT_ID=your_project_id
-SANITY_DATASET=production
-SANITY_WRITE_TOKEN=your_write_token_here
-
-# Email (Choose one)
-RESEND_API_KEY=re_your_api_key_here
-RESEND_FROM=noreply@yourdomain.com
-
-# Contact recipient
-CONTACT_EMAIL=your-email@example.com
+```bash
+npx prisma migrate dev --name init   # creates tables + a migration history
+# or, for a quick non-versioned sync:
+# npx prisma db push
 ```
 
-## Step 3: Set Up Resend (Email Service)
+This creates the `User`, `Profile`, `Session`, `Lead`, and `Contact` tables.
 
-### 3.1 Create Resend Account
-
-1. Go to https://resend.com
-2. Sign up and verify your email
-3. Add your domain (or use `resend.dev` for testing)
-
-### 3.2 Get API Key
-
-1. Navigate to **Settings → API Keys**
-2. Click **Create API Key**
-3. Copy the key and add to `.env.local`:
-
-```env
-RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-```
-
-### 3.3 Verify Sender Email
-
-1. Go to **Settings → Domains**
-2. Add your domain and verify DNS records
-3. Update `RESEND_FROM` in `.env.local`:
-
-```env
-RESEND_FROM=hello@yourdomain.com
-```
-
-## Step 4: Testing
-
-### 4.1 Start Development Server
+## Step 3 — Run
 
 ```bash
 npm run dev
 ```
 
-### 4.2 Test Contact Form
+- Visit `/register` — **the first account created automatically becomes ADMIN**;
+  every subsequent account is a CLIENT.
+- ADMIN users land in `/admin` (dashboard, leads, users).
+- CLIENT users land in `/account` (profile settings).
 
-1. Navigate to `http://localhost:3000/contact`
-2. Fill out the form and submit
-3. Check that:
-   - Success message appears
-   - Email is received at `CONTACT_EMAIL`
-   - New "Contact" document appears in Sanity Studio under Content
+Inspect data anytime with `npm run db:studio`.
 
-### 4.3 Verify in Sanity
+## Architecture
 
-1. Go to your Sanity Studio
-2. Select **Contact** from the sidebar
-3. You should see new submissions with:
-   - Name, email, company, message
-   - Submission timestamp
-   - Status field (default: "New")
+### Authentication (hybrid)
 
-## Step 5: Managing Submissions
+- **Access token** — short-lived JWT (`jose`, HS256) in an HTTP-only cookie,
+  carrying `{ sub, role, sid }`.
+- **Refresh token** — opaque random string in an HTTP-only cookie; only its
+  SHA-256 hash is stored in the `Session` table, so a DB leak exposes no usable
+  tokens. Revoking a `Session` row kills the session server-side.
+- `GET /api/auth/me` is **self-healing**: if the access token has expired but the
+  refresh token is still valid, it rotates the session and re-issues cookies.
+- The client `AuthProvider` runs a silent-refresh timer (every 10 min) so access
+  tokens stay fresh ahead of the 15-min expiry.
 
-You can now manage contact submissions directly in Sanity Studio:
+### Auth API
 
-- **View all submissions**: Click "Contact" in the sidebar
-- **Change status**: Update the "Status" field (New → In Progress → Resolved)
-- **Add notes**: Use the "Internal Notes" field to track responses
-- **Search**: Use the search bar to find submissions by name or email
+| Route                  | Method    | Purpose                                  |
+| ---------------------- | --------- | ---------------------------------------- |
+| `/api/auth/register`   | POST      | Create account (bcrypt hash) + session   |
+| `/api/auth/login`      | POST      | Verify credentials, issue tokens         |
+| `/api/auth/logout`     | POST      | Revoke session, clear cookies            |
+| `/api/auth/me`         | GET       | Persistent session check (self-healing)  |
+| `/api/auth/refresh`    | POST      | Rotate refresh token, mint access token  |
+| `/api/profile`         | GET/PATCH | Read/update the current user's profile   |
 
-## Troubleshooting
+### RBAC & route protection
 
-### "Sanity write token not configured"
+- **`proxy.ts`** (Next 16's renamed middleware) guards `/admin/*` and `/account/*`
+  at the edge using the access-token JWT — fast, coarse gating.
+- **`requireUser()` / `requireRole()`** in `lib/auth/current-user.ts` re-check on
+  the server inside layouts (defense in depth).
+- Admin API routes (`/api/leads/*`) verify `role === "ADMIN"` server-side.
 
-**Solution**: Add `SANITY_WRITE_TOKEN` to `.env.local`
+### Layouts (route groups)
 
-```bash
-SANITY_WRITE_TOKEN=your_write_token_here
+```
+app/
+  layout.tsx          # root shell: <html>/<body>, theme, AuthProvider
+  (site)/             # public marketing site — navbar + footer chrome
+  (auth)/             # login / register — centered card
+  account/            # CLIENT area — navbar + profile settings (auth required)
+  admin/              # ADMIN area — sidebar dashboard (ADMIN required)
 ```
 
-### Email not sending
+### Key files
 
-**Solution**: Check these steps:
-
-1. Verify `RESEND_API_KEY` is set correctly
-2. Ensure sender domain is verified in Resend
-3. Check that `CONTACT_EMAIL` is valid
-4. Review server logs for detailed error messages
-
-### Documents not appearing in Sanity
-
-**Solution**:
-1. Verify `SANITY_WRITE_TOKEN` has "Editor" permissions
-2. Confirm `SANITY_PROJECT_ID` and `SANITY_DATASET` match your project
-3. Check that the "contact" schema is deployed to Sanity Studio
-4. Try refreshing Sanity Studio in the browser
-
-### Rate limit errors
-
-**Solution**: The form is limited to 5 submissions per 10 minutes per IP address. This is intentional to prevent spam. Wait 10 minutes and try again.
-
-## Alternative: Using SMTP Instead of Resend
-
-If you prefer to use an existing email service via SMTP:
-
-1. Get your SMTP credentials from your email provider
-2. Add to `.env.local`:
-
-```env
-SMTP_URL=smtp://username:password@smtp.example.com:587
-SMTP_FROM=hello@example.com
 ```
-
-3. Remove or comment out `RESEND_API_KEY`
-
-## Next Steps
-
-- Monitor submissions in Sanity Studio
-- Integrate with your internal systems (CRM, ticketing, etc.)
-- Set up automations (e.g., auto-respond, webhook notifications)
-- Review and respond to contacts regularly
-
----
-
-For more help, check:
-- [Sanity Documentation](https://www.sanity.io/docs)
-- [Resend Documentation](https://resend.com/docs)
-- [NextJS API Routes](https://nextjs.org/docs/app/building-your-application/routing/route-handlers)
+prisma/schema.prisma              # User, Profile, Session, Lead, Contact + enums
+lib/prisma.ts                     # PrismaClient singleton
+lib/auth/                         # jwt, password, session, cookies, current-user, constants
+lib/validations/auth.ts           # zod schemas for register/login/profile
+proxy.ts                          # edge RBAC guard
+components/auth/AuthProvider.tsx  # client session context + silent refresh
+features/leads/lib/repository.ts  # Prisma-backed lead/contact persistence
+```

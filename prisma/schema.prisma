@@ -1,0 +1,254 @@
+// Prisma schema — self-hosted relational backend (replaces Sanity).
+// Docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ----------------------------------------------------------------------------
+// Auth & identity
+// ----------------------------------------------------------------------------
+
+enum Role {
+  ADMIN
+  CLIENT
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  passwordHash  String?        // null for OAuth-only (e.g. Google) accounts
+  googleId      String?        @unique
+  role          Role           @default(CLIENT)
+  profile       Profile?
+  sessions      Session[]
+  notifications Notification[]
+  enrollments   Enrollment[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([role])
+}
+
+// In-app notification delivered to a specific user.
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  body      String?
+  type      String   @default("info") // lead | enrollment | system | info
+  link      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, read])
+  @@index([userId, createdAt])
+}
+
+// One-to-one extension of User for display/profile data.
+model Profile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  firstName String?
+  lastName  String?
+  avatarUrl String?
+  bio       String?
+  phone     String?
+  company   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Server-side record for each refresh token (hybrid JWT-access + DB-refresh).
+// The opaque refresh token is stored hashed; revoking a row kills the session.
+model Session {
+  id               String    @id @default(cuid())
+  userId           String
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshTokenHash String    @unique
+  userAgent        String?
+  ip               String?
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  createdAt        DateTime  @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+// ----------------------------------------------------------------------------
+// CRM data (migrated off Sanity — leads + contact submissions)
+// ----------------------------------------------------------------------------
+
+enum LeadType {
+  contact
+  demo
+  chatbot
+}
+
+enum LeadStatus {
+  new
+  contacted
+  demo_scheduled
+  proposal_sent
+  converted
+  lost
+}
+
+model Lead {
+  id        String     @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  company   String?
+  service   String?
+  message   String?
+  type      LeadType   @default(contact)
+  status    LeadStatus @default(new)
+  demoDate  String?
+  demoTime  String?
+  useCase   String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum ContactStatus {
+  new
+  in_progress
+  resolved
+  spam
+}
+
+// ----------------------------------------------------------------------------
+// Marketing content (admin-managed via /admin CRUD)
+// ----------------------------------------------------------------------------
+
+// Data/AI engineering case study.
+model CaseStudy {
+  id           String   @id @default(cuid())
+  title        String
+  slug         String   @unique
+  excerpt      String
+  industry     String
+  problem      String
+  approach     String[]
+  outcomes     Json     // Array<{ label: string; value: string }>
+  technologies String[]
+  published    Boolean  @default(true)
+  publishedAt  DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([published, publishedAt])
+}
+
+// Training / workshop offering.
+model Training {
+  id          String       @id @default(cuid())
+  title       String
+  slug        String       @unique
+  level       String
+  duration    String
+  summary     String
+  topics      String[]
+  published   Boolean      @default(true)
+  order       Int          @default(0)
+  enrollments Enrollment[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([published, order])
+}
+
+enum EnrollmentStatus {
+  pending
+  approved
+  enrolled
+  completed
+  cancelled
+}
+
+// A student's enrollment in a training. Students are CLIENT users.
+model Enrollment {
+  id             String           @id @default(cuid())
+  userId         String
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trainingId     String
+  training       Training         @relation(fields: [trainingId], references: [id], onDelete: Cascade)
+  status         EnrollmentStatus @default(pending)
+  phone          String?
+  experience     String?
+  goals          String?
+  // Admin-managed fields surfaced in the student panel:
+  schedule       String?
+  meetingLink    String?
+  materialsUrl   String?
+  certificateUrl String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@unique([userId, trainingId])
+  @@index([status])
+  @@index([userId])
+}
+
+// Service / capability offering.
+model Service {
+  id         String   @id @default(cuid())
+  title      String
+  slug       String   @unique
+  summary    String
+  category    String
+  highlights String[]
+  published  Boolean  @default(true)
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([published, order])
+}
+
+// "Our Work" — delivered web/app projects.
+model Project {
+  id           String   @id @default(cuid())
+  title        String
+  slug         String   @unique
+  summary      String
+  industry     String?
+  problem      String?
+  approach     String[]
+  outcomes     Json     // Array<{ label: string; value: string }>
+  technologies String[]
+  published    Boolean  @default(true)
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([published, order])
+}
+
+model Contact {
+  id        String        @id @default(cuid())
+  name      String
+  email     String
+  company   String?
+  message   String
+  status    ContactStatus @default(new)
+  notes     String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+}

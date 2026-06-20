@@ -19,7 +19,7 @@ export function WhatsAppFloatingButton() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat on WhatsApp"
-      className="fixed bottom-4 right-4 z-[60] flex h-14 w-14 items-center justify-center rounded-full bg-green-500 hover:bg-green-600 text-white shadow-lg transition-colors"
+      className="fixed bottom-4 left-4 z-[60] flex h-14 w-14 items-center justify-center rounded-full bg-green-500 hover:bg-green-600 text-white shadow-lg transition-colors"
     >
       <Phone className="h-6 w-6" />
       <span className="sr-only">Chat on WhatsApp</span>

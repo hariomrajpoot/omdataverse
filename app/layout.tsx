@@ -1,13 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
 import { siteConfig } from "@/features/shared/lib/site";
 import { DebugHydrationProbe } from "@/features/shared/components/DebugHydrationProbe";
-import { WhatsAppFloatingButton } from "@/features/shared/components/WhatsAppFloatingButton";
-import { ChatWidget } from "@/components/chatbot/ChatWidget";
-import { LenisProvider } from "@/components/layout/LenisProvider";
+import { AuthProvider } from "@/components/auth/AuthProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -109,18 +105,10 @@ export default function RootLayout({
             src="https://plausible.io/js/script.js"
           />
         ) : null}
-        <div className="flex min-h-dvh flex-col">
-          <Navbar />
-          <LenisProvider>
-            <main id="main" className="flex-1">
-              {children}
-            </main>
-          </LenisProvider>
-          <Footer />
-          {/* floating chat button is rendered globally; the link is configured via env */}
-          <WhatsAppFloatingButton />
-          <ChatWidget />
-        </div>
+        {/* AuthProvider exposes the current session to all route groups
+            (public site, admin, client account). Per-area chrome lives in each
+            group's own layout. */}
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

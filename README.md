@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This is a modern, enterprise-ready AI consulting website built with Next.js 16. It showcases services for building data platforms using Microsoft Cloud technologies like Fabric, Azure, and Databricks. The site includes a contact form, case studies, services pages, and integrates with Sanity CMS for content management.
+This is a modern, enterprise-ready AI consulting website built with Next.js 16. It showcases services for building data platforms using Microsoft Cloud technologies like Fabric, Azure, and Databricks. The site includes a contact form, case studies, services pages, and a self-hosted backend (PostgreSQL via Prisma) with custom authentication and role-based access control. See [SETUP.md](SETUP.md) for backend setup.
 
 **New Features Added:**
 - **Lead Management System**: Complete lead capture, demo booking, and admin dashboard
@@ -30,7 +30,7 @@ The project now includes a complete lead management and demo booking system:
 - `PATCH /api/leads/update` - Update lead status (admin only)
 
 ### Database Schema
-Leads are stored in Sanity CMS with the following fields:
+Leads are stored in our PostgreSQL database via Prisma (`Lead` model) with the following fields:
 - Basic info: name, email, phone, company
 - Service interest and message
 - Type: contact, demo, or chatbot
@@ -38,12 +38,11 @@ Leads are stored in Sanity CMS with the following fields:
 - Demo details: date, time, use case (for demo leads)
 
 ### Environment Variables
-Add these to your `.env.local`:
+Add these to your `.env` (see [.env.example](.env.example) and [SETUP.md](SETUP.md)):
 ```
-RESEND_API_KEY=re_XmjHP2ht_9VQXvuG6z5MiMkLkTN8GZXK1
-RESEND_FROM=onboarding@resend.dev
-SANITY_WRITE_TOKEN=your_sanity_write_token
-SANITY_READ_TOKEN=your_sanity_read_token
+DATABASE_URL=postgresql://user:pass@localhost:5432/omdataverse?schema=public
+JWT_ACCESS_SECRET=your_long_random_secret
+RESEND_API_KEY=your_resend_key
 CONTACT_EMAIL=hello@example.com
 ```
 
@@ -125,32 +124,32 @@ This project uses Next.js 16's **App Router** (in the `app/` directory). Unlike 
 
 ### 4. Data Fetching
 - Server components can use `async/await` to fetch data
-- Uses Sanity CMS for content, with fallback to mock data
+- Marketing content ships from local data (`lib/mockData.ts`); dynamic business data (users, leads) lives in PostgreSQL via Prisma
 
 ## Project Structure
 
 ```
 ├── app/                    # Next.js App Router
-│   ├── layout.tsx         # Root layout (shared header/footer)
-│   ├── page.tsx           # Home page
-│   ├── globals.css        # Global styles
-│   ├── about/page.tsx     # About page
-│   ├── contact/page.tsx   # Contact page
-│   └── api/               # API routes
-│       └── contact/route.ts
+│   ├── layout.tsx         # Root shell (<html>/<body>, theme, AuthProvider)
+│   ├── (site)/            # Public marketing site (navbar + footer chrome)
+│   ├── (auth)/            # Login / register
+│   ├── account/           # CLIENT area (profile settings, auth required)
+│   ├── admin/             # ADMIN area (sidebar dashboard, ADMIN required)
+│   └── api/               # API routes (auth, profile, leads, contact, chat)
 ├── components/            # Reusable UI components
-│   ├── Hero.tsx          # Hero section
-│   ├── ServicesGrid.tsx  # Services display
+│   ├── auth/             # AuthProvider, AuthNav
+│   ├── admin/            # Admin sidebar
 │   └── ...
 ├── features/             # Feature-based organization
 │   ├── shared/           # Shared components & utilities
-│   ├── contact/          # Contact feature
-│   └── ...
+│   ├── leads/            # Lead service + Prisma repository
+│   └── contact/          # Contact feature
 ├── lib/                  # Utility libraries
-│   ├── sanity/           # Sanity CMS integration
-│   ├── utils.ts          # Helper functions
-│   └── types.ts          # TypeScript types
-├── sanity/               # Sanity CMS configuration
+│   ├── auth/             # jwt, password, sessions, cookies, current-user
+│   ├── prisma.ts         # PrismaClient singleton
+│   └── validations/      # Zod schemas
+├── prisma/               # schema.prisma (User, Profile, Session, Lead, Contact)
+├── proxy.ts              # Edge RBAC guard (Next 16 middleware)
 └── public/               # Static assets
 ```
 
@@ -170,8 +169,8 @@ The `@/` is an alias for the project root (configured in `tsconfig.json`).
 In `app/page.tsx`:
 ```tsx
 export default async function Home() {
-  // Fetch data from Sanity or use mock data
-  const services = await sanityFetch({ query: servicesQuery });
+  // Marketing content ships from local data
+  const services = mockServices;
 
   return (
     <div>
@@ -257,7 +256,7 @@ async function submitForm(data) {
 1. User fills contact form
 2. Form submits to `/api/contact`
 3. API validates data with Zod schema
-4. Saves to Sanity CMS
+4. Persists to PostgreSQL via Prisma
 5. Sends email via Resend
 6. Returns success/error response
 
@@ -273,12 +272,13 @@ npm install
 ```
 
 ### 2. Environment Variables
-Create `.env.local`:
+Create `.env` (see [.env.example](.env.example)):
 ```env
-# Sanity CMS
-SANITY_PROJECT_ID=your_project_id
-SANITY_DATASET=production
-SANITY_API_TOKEN=your_write_token
+# Database (PostgreSQL)
+DATABASE_URL=postgresql://user:pass@localhost:5432/omdataverse?schema=public
+
+# Auth
+JWT_ACCESS_SECRET=your_long_random_secret
 
 # Email (Resend)
 RESEND_API_KEY=your_resend_key
@@ -295,15 +295,12 @@ NEXT_PUBLIC_WHATSAPP_NUMBER=919754799646  # your WhatsApp number in internationa
 # no paid API is required – omit RESEND_API_KEY/SMTP_URL to skip email entirely.
 ```
 
-### 3. Sanity Setup
-1. Create project at https://sanity.io
-2. Add schemas from `sanity/schemaTypes/`
-3. Configure tokens in Sanity dashboard
-
-### 4. Seed Content (Optional)
+### 3. Database Setup
 ```bash
-npm run seed:content
+npx prisma migrate dev --name init   # create tables
+npm run db:studio                     # (optional) inspect data
 ```
+The first account registered at `/register` automatically becomes ADMIN.
 
 ## Running the Project
 
@@ -332,15 +329,15 @@ npm run format
 
 ## Key Features Explained
 
-### 1. Content Management with Sanity
-- Case studies, services stored in Sanity
-- Automatic fallback to mock data if Sanity not configured
-- Real-time content updates
+### 1. Authentication & RBAC
+- Hybrid JWT access tokens + DB-backed refresh sessions (HTTP-only cookies)
+- bcrypt password hashing; roles ADMIN and CLIENT
+- Edge `proxy.ts` guard + server-side `requireRole()` (defense in depth)
 
 ### 2. Contact Form
 - Client-side validation with Zod
 - Rate limiting to prevent spam
-- Saves to Sanity + sends email
+- Persists to PostgreSQL via Prisma + sends email
 - CORS enabled for cross-origin requests
 
 ### 3. Responsive Design

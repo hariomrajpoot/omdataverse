@@ -1,6 +1,6 @@
 import { leadSchema, sanitizeLead } from "@/lib/validations";
 import { sendLead } from "@/features/shared/lib/email/sendLead";
-import { saveLead } from "@/features/shared/lib/sanity/saveLead";
+import { saveLead } from "@/features/leads/lib/repository";
 
 export interface LeadData {
   name: string;
@@ -17,7 +17,7 @@ export class LeadService {
     const validatedData = leadSchema.parse(leadData);
     const sanitizedData = sanitizeLead(validatedData);
 
-    // Save to Sanity
+    // Persist to our database
     const savedLead = await saveLead(sanitizedData);
 
     // Send notification email

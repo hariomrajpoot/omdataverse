@@ -114,7 +114,3 @@ export const mockTeam: TeamMember[] = [
     bio: "Built data platforms and analytics systems across regulated and high-growth environments. Focused on pragmatic delivery, security, and measurable outcomes.",
   },
 ];
-
-export function isSanityConfigured() {
-  return Boolean(process.env.SANITY_PROJECT_ID && process.env.SANITY_DATASET);
-}

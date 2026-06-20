@@ -75,7 +75,7 @@ export async function sendLead(lead: Lead): Promise<SendLeadResult> {
 
   if (process.env.SMTP_URL) {
     const transport = nodemailer.createTransport(process.env.SMTP_URL);
-    const from = process.env.SMTP_FROM || "omdataverse@localhost";
+    const from = process.env.SMTP_FROM || "omansai@localhost";
     const info = await transport.sendMail({
       from,
       to,

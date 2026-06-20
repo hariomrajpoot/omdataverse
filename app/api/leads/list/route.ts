@@ -1,54 +1,21 @@
 import { NextResponse } from "next/server";
-import { createClient } from "next-sanity";
-import { sanityEnv } from "@/features/shared/lib/sanity/env";
+import { listLeads } from "@/features/leads/lib/repository";
+import { getCurrentUser } from "@/lib/auth/current-user";
 
 export const runtime = "nodejs";
 
+// Admin-only: powers the /admin/leads dashboard.
 export async function GET() {
-  const projectId = sanityEnv.projectId;
-  const dataset = sanityEnv.dataset;
-  const readToken = process.env.SANITY_READ_TOKEN;
-
-  if (!projectId || !dataset) {
-    return NextResponse.json(
-      { error: "Sanity configuration incomplete" },
-      { status: 500 }
-    );
+  const user = await getCurrentUser();
+  if (!user || user.role !== "ADMIN") {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const client = createClient({
-    projectId,
-    dataset,
-    apiVersion: sanityEnv.apiVersion,
-    token: readToken,
-    useCdn: false,
-  });
-
   try {
-    const leads = await client.fetch(`
-      *[_type == "lead"] | order(createdAt desc) {
-        _id,
-        name,
-        email,
-        phone,
-        company,
-        service,
-        message,
-        type,
-        status,
-        demoDate,
-        demoTime,
-        useCase,
-        createdAt
-      }
-    `);
-
+    const leads = await listLeads();
     return NextResponse.json({ leads });
   } catch (error) {
     console.error("Failed to fetch leads:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch leads" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch leads" }, { status: 500 });
   }
 }

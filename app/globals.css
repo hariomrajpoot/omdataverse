@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Tailwind v4 does not auto-load the JS config — without this, the brand-*
+   color utilities (bg-brand-accent, text-brand-fg, …) are never generated,
+   which made accent buttons render white-on-white. */
+@config "../tailwind.config.ts";
+
 :root {
   /*
     Modern SaaS Color Palette - Light Mode
@@ -54,11 +59,108 @@ body {
     Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
 }
 
+/* Single-accent discipline: selection + focus track the brand accent so the
+   whole UI reads as one deliberate color system. Swap --brand-accent to
+   re-theme the entire site. */
 ::selection {
-  background: rgba(233, 244, 90, 0.4);
+  background: rgb(var(--brand-accent) / 0.25);
 }
 
 :focus-visible {
-  outline: 2px solid rgba(233, 244, 90, 0.9);
+  outline: 2px solid rgb(var(--brand-accent) / 0.9);
   outline-offset: 3px;
+}
+
+/* Respect users who prefer reduced motion: neutralize transforms/animations
+   globally as a safety net (components also handle this individually). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Pixel-reveal button (components/ui/nextjsshop-button.tsx)
+   Brand-matched: base + pixels are driven by --brand-accent, so it tracks
+   light/dark and any accent re-theme automatically.
+   --------------------------------------------------------------------------- */
+.button01 {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 3rem;
+  padding: 0 1.75rem;
+  border-radius: 0.625rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1;
+  color: #fff;
+  text-decoration: none;
+  overflow: hidden;
+  isolation: isolate;
+  background: rgb(var(--brand-accent));
+  box-shadow: 0 1px 2px rgb(var(--brand-accent) / 0.25);
+  transition: box-shadow 0.25s ease, transform 0.12s ease;
+}
+.button01:hover {
+  box-shadow: 0 8px 24px rgb(var(--brand-accent) / 0.4);
+}
+.button01:active {
+  transform: scale(0.98);
+}
+
+.button01_bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.button01_bg-mid {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    rgb(var(--brand-accent)),
+    color-mix(in oklab, rgb(var(--brand-accent)) 55%, #4f46e5)
+  );
+}
+.button01_bg-right,
+.button01_bg-right-overlay {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 55%;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-auto-rows: 1fr;
+}
+.button01_bg-pixel {
+  background: rgba(255, 255, 255, 0.18);
+  opacity: 0;
+  transform: scale(0.4);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  transition-delay: calc(var(--index, 0) * 45ms);
+}
+.button01:hover .button01_bg-pixel {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.button01_inner {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+}
+.button01_text {
+  transition: transform 0.25s ease;
+}
+.button01:hover .button01_text {
+  transform: translateX(-1px);
 }

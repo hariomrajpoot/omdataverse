@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Minimize2, RotateCcw, User } from "lucide-react";
 import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
+import { AssistantLogo } from "./AssistantLogo";
 
 export interface Message {
   id: string;
@@ -27,7 +28,7 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
-      content: "Hi 👋 I'm the OmDataverse AI assistant.\n\nI can help you explore our AI consulting services, build enterprise data platforms, or book a demo. What would you like to know?",
+      content: "Hi 👋 I'm the Omansai AI assistant.\n\nI can help you explore our AI consulting services, build enterprise data platforms, or book a demo. What would you like to know?",
       role: "assistant",
       timestamp: new Date(),
     },
@@ -154,7 +155,7 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
       console.error("Lead submission error:", error);
       const errorMessage: Message = {
         id: (Date.now() + 2).toString(),
-        content: "Sorry, there was an issue capturing your information. Please try again or contact us directly at hello@omdataverse.com",
+        content: "Sorry, there was an issue capturing your information. Please try again or contact us directly at hello@omansai.com",
         role: "assistant",
         timestamp: new Date(),
       };
@@ -168,7 +169,7 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
     setMessages([
       {
         id: "welcome",
-        content: "Hi 👋 I'm the OmDataverse AI assistant.\n\nI can help you explore our AI consulting services, build enterprise data platforms, or book a demo. What would you like to know?",
+        content: "Hi 👋 I'm the Omansai AI assistant.\n\nI can help you explore our AI consulting services, build enterprise data platforms, or book a demo. What would you like to know?",
         role: "assistant",
         timestamp: new Date(),
       },
@@ -188,7 +189,7 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
         <div className="bg-white/90 backdrop-blur-md border border-gray-200 rounded-lg p-3 shadow-lg">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="text-sm font-medium text-gray-700">OmDataverse Assistant</span>
+            <span className="text-sm font-medium text-gray-700">Omansai Assistant</span>
             <button
               onClick={() => setIsMinimized(false)}
               className="ml-auto text-gray-500 hover:text-gray-700"
@@ -216,16 +217,14 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
       />
 
       {/* Chat Window */}
-      <div className="bg-white/95 backdrop-blur-md border border-gray-200 rounded-2xl shadow-2xl overflow-hidden">
+      <div className="flex max-h-[calc(100dvh-7rem)] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white/95 shadow-2xl backdrop-blur-md">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                <span className="text-sm font-bold">AI</span>
-              </div>
+              <AssistantLogo size={32} />
               <div>
-                <h3 className="font-semibold">OmDataverse Assistant</h3>
+                <h3 className="font-semibold">Omansai Assistant</h3>
                 <p className="text-xs opacity-90">Online now</p>
               </div>
             </div>
@@ -249,7 +248,7 @@ export function ChatWindow({ onClose }: ChatWindowProps) {
         </div>
 
         {/* Messages */}
-        <div className="h-96 overflow-y-auto p-4 space-y-4">
+        <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
           {messages.map((message) => (
             <ChatMessage key={message.id} message={message} />
           ))}

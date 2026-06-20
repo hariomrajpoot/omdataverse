@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X } from "lucide-react";
+import { X } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { ChatWindow } from "./ChatWindow";
+import { AssistantLogo } from "./AssistantLogo";
 
 export function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -14,15 +16,21 @@ export function ChatWidget() {
       <motion.div
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
-        className="fixed bottom-20 right-6 z-50"
+        className="fixed bottom-6 right-6 z-[60]"
       >
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setIsOpen(!isOpen)}
-          className="relative h-14 w-14 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg hover:shadow-xl transition-shadow duration-300 flex items-center justify-center"
+          aria-label={isOpen ? "Close assistant" : "Open AI assistant"}
+          className={cn(
+            "relative flex h-14 w-14 items-center justify-center rounded-full shadow-lg ring-1 ring-white/15 transition-shadow duration-300 hover:shadow-xl",
+            isOpen
+              ? "bg-gradient-to-br from-blue-600 to-purple-600"
+              : "bg-gradient-to-br from-blue-600 to-indigo-700",
+          )}
         >
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait" initial={false}>
             {isOpen ? (
               <motion.div
                 key="close"
@@ -35,30 +43,25 @@ export function ChatWidget() {
               </motion.div>
             ) : (
               <motion.div
-                key="chat"
-                initial={{ rotate: 90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: -90, opacity: 0 }}
+                key="logo"
+                initial={{ scale: 0.6, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.6, opacity: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <MessageCircle className="h-6 w-6 text-white" />
+                {/* Animated AI-assistant logo */}
+                <AssistantLogo size={30} />
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Pulse animation when closed */}
+          {/* Soft attention halo when closed (sits behind the logo) */}
           {!isOpen && (
-            <motion.div
-              className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-600 to-purple-600"
-              animate={{
-                scale: [1, 1.2, 1],
-                opacity: [0.7, 0, 0.7],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
+            <motion.span
+              aria-hidden
+              className="absolute -z-10 h-14 w-14 rounded-full bg-sky-400/30"
+              animate={{ scale: [1, 1.35, 1], opacity: [0.6, 0, 0.6] }}
+              transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
             />
           )}
         </motion.button>

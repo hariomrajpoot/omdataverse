@@ -3,12 +3,15 @@ export interface Service {
   title: string;
   slug: string;
   summary: string;
-  category:
-    | "Data Foundations"
-    | "AI & Automation"
-    | "Advanced Analytics"
-    | "Infrastructure & DevOps";
+  // Free-form so services are fully admin-manageable. Known categories get a
+  // matching icon in ServicesGrid; others fall back to a default icon.
+  category: string;
   highlights?: string[];
+}
+
+export interface Outcome {
+  label: string;
+  value: string;
 }
 
 export interface CaseStudy {
@@ -19,9 +22,31 @@ export interface CaseStudy {
   industry: string;
   problem: string;
   approach: string[];
-  outcomes: { label: string; value: string }[];
+  outcomes: Outcome[];
   technologies: string[];
   publishedAt: string; // ISO
+}
+
+export interface Training {
+  id?: string;
+  title: string;
+  slug: string;
+  level: string;
+  duration: string;
+  summary: string;
+  topics: string[];
+}
+
+export interface Project {
+  id?: string;
+  title: string;
+  slug: string;
+  summary: string;
+  industry?: string | null;
+  problem?: string | null;
+  approach: string[];
+  outcomes: Outcome[];
+  technologies: string[];
 }
 
 export interface TeamMember {

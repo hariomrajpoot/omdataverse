@@ -6,19 +6,21 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/features/shared/lib/site";
 import { ThemeToggle } from "@/features/shared/components/ThemeToggle";
-import { Menu, X, Sparkles } from "lucide-react";
+import { AuthNav } from "@/components/auth/AuthNav";
+import { Menu, X } from "lucide-react";
 
 export interface NavLink {
   label: string;
   href: string;
 }
 
+// Kept lean to avoid a congested bar — secondary links live in the footer.
 const navLinks: NavLink[] = [
   { label: "Services", href: "/services" },
-  { label: "Accelerator", href: "/accelerator" },
+  { label: "Our Work", href: "/work" },
   { label: "Case Studies", href: "/case-studies" },
+  { label: "Trainings", href: "/trainings" },
   { label: "About", href: "/about" },
-  { label: "Contact", href: "/contact" },
 ];
 
 export function Navbar() {
@@ -47,13 +49,10 @@ export function Navbar() {
         >
           <Link
             href="/"
-            className="group inline-flex items-center gap-3 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+            className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2"
             aria-label={`${siteConfig.name} home`}
           >
-            <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-linear-to-br from-[rgb(var(--brand-secondary))] to-[rgb(var(--brand-primary))] text-[rgb(var(--brand-onPrimary))] shadow-lg group-hover:shadow-xl transition-all duration-300">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <span className="text-lg font-bold tracking-tight text-slate-900 dark:text-white">
+            <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
               {siteConfig.name}
             </span>
           </Link>
@@ -95,7 +94,8 @@ export function Navbar() {
           className="flex items-center gap-3"
         >
           <ThemeToggle />
-          <Button asChild className="hidden sm:inline-flex bg-linear-to-r from-[rgb(var(--brand-secondary))] to-[rgb(var(--brand-primary))] hover:from-[rgb(var(--brand-secondary))]/90 hover:to-[rgb(var(--brand-primary))]/90 text-[rgb(var(--brand-onPrimary))] shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+          <AuthNav />
+          <Button asChild className="hidden sm:inline-flex bg-brand-accent text-white hover:bg-brand-accent/90 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
             <Link href={siteConfig.links.bookAudit}>
               Book Audit
             </Link>
@@ -141,7 +141,7 @@ export function Navbar() {
               ))}
             </ul>
             <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
-              <Button asChild className="w-full bg-linear-to-r from-[rgb(var(--brand-secondary))] to-[rgb(var(--brand-primary))] hover:from-[rgb(var(--brand-secondary))]/90 hover:to-[rgb(var(--brand-primary))]/90 text-[rgb(var(--brand-onPrimary))]">
+              <Button asChild className="w-full bg-brand-accent text-white hover:bg-brand-accent/90">
                 <Link href={siteConfig.links.bookAudit} onClick={() => setIsMenuOpen(false)}>
                   Book Audit
                 </Link>

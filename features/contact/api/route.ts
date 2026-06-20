@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { leadSchema, sanitizeLead } from "@/lib/validations";
 import { getClientIp, rateLimit } from "@/features/contact/lib/rateLimit";
 import { sendLead } from "@/features/shared/lib/email/sendLead";
-import { saveLead } from "@/features/shared/lib/sanity/saveLead";
+import { saveLead } from "@/features/leads/lib/repository";
+import { notifyAdmins } from "@/lib/notifications";
 
 export const runtime = "nodejs";
 
@@ -76,14 +77,26 @@ export async function POST(req: Request) {
   const lead = sanitizeLead(parsed.data);
 
   try {
-    // Save to Sanity first for guaranteed persistence
+    // Persist to our database first for guaranteed storage.
     let contactId: string | null = null;
     try {
       const saved = await saveLead(lead);
       contactId = saved.id;
-    } catch (sanityErr) {
-      console.error("Failed to save lead to Sanity:", sanityErr);
-      // Continue to send email even if Sanity save fails
+    } catch (dbErr) {
+      console.error("Failed to save lead to database:", dbErr);
+      // Continue to send email even if persistence fails.
+    }
+
+    // In-app notification to admins.
+    try {
+      await notifyAdmins({
+        title: `New contact message: ${lead.name}`,
+        body: `${lead.email}${lead.company ? ` · ${lead.company}` : ""}`,
+        type: "lead",
+        link: "/admin/leads",
+      });
+    } catch (notifyErr) {
+      console.error("Failed to notify admins:", notifyErr);
     }
 
     // Send email
