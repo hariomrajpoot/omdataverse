@@ -109,3 +109,5 @@ proxy.ts                          # edge RBAC guard
 components/auth/AuthProvider.tsx  # client session context + silent refresh
 features/leads/lib/repository.ts  # Prisma-backed lead/contact persistence
 ```
+
+

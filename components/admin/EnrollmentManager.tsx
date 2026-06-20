@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { X } from "lucide-react";
+import { Mail, MessageCircle, X } from "lucide-react";
 
 export interface EnrollmentRow {
   id: string;
   student: string;
   email: string;
+  phone: string;
   training: string;
   status: string;
   createdAt: string;
@@ -30,7 +31,7 @@ const STATUS_STYLES: Record<string, string> = {
 export function EnrollmentManager({ items }: { items: EnrollmentRow[] }) {
   const router = useRouter();
   const [editing, setEditing] = useState<EnrollmentRow | null>(null);
-  const [form, setForm] = useState<Omit<EnrollmentRow, "id" | "student" | "email" | "training" | "createdAt">>({
+  const [form, setForm] = useState<Omit<EnrollmentRow, "id" | "student" | "email" | "phone" | "training" | "createdAt">>({
     status: "pending",
     schedule: "",
     meetingLink: "",
@@ -87,6 +88,7 @@ export function EnrollmentManager({ items }: { items: EnrollmentRow[] }) {
             <tr className="text-left text-xs font-medium uppercase tracking-wider text-brand-fg/50">
               <th className="px-4 py-3">Student</th>
               <th className="px-4 py-3">Training</th>
+              <th className="px-4 py-3">Contact</th>
               <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3">Requested</th>
               <th className="px-4 py-3 text-right">Manage</th>
@@ -100,6 +102,32 @@ export function EnrollmentManager({ items }: { items: EnrollmentRow[] }) {
                   <div className="text-xs text-brand-fg/55">{row.email}</div>
                 </td>
                 <td className="px-4 py-3 text-brand-fg/80">{row.training}</td>
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-1.5">
+                    {row.phone ? (
+                      <a
+                        href={`https://wa.me/${row.phone.replace(/\D/g, "")}?text=${encodeURIComponent(
+                          `Hi ${row.student}, regarding your enrollment in "${row.training}"…`,
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={`WhatsApp ${row.phone}`}
+                        className="inline-flex h-8 items-center gap-1 rounded-md bg-green-500/10 px-2 text-xs font-medium text-green-700 hover:bg-green-500/20 dark:text-green-300"
+                      >
+                        <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
+                      </a>
+                    ) : (
+                      <span className="text-xs text-brand-fg/40">no phone</span>
+                    )}
+                    <a
+                      href={`mailto:${row.email}?subject=${encodeURIComponent(`Your enrollment: ${row.training}`)}`}
+                      title={`Email ${row.email}`}
+                      className="inline-flex h-8 items-center gap-1 rounded-md bg-brand-accent/10 px-2 text-xs font-medium text-brand-accent hover:bg-brand-accent/20"
+                    >
+                      <Mail className="h-3.5 w-3.5" /> Email
+                    </a>
+                  </div>
+                </td>
                 <td className="px-4 py-3">
                   <span
                     className={`rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${
@@ -124,7 +152,7 @@ export function EnrollmentManager({ items }: { items: EnrollmentRow[] }) {
             ))}
             {items.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-sm text-brand-fg/50">
+                <td colSpan={6} className="px-4 py-8 text-center text-sm text-brand-fg/50">
                   No enrollments yet.
                 </td>
               </tr>

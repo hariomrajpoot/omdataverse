@@ -171,15 +171,20 @@ export function EnrollFlow({
             <div className="space-y-4">
               <div>
                 <label htmlFor="phone" className="mb-1 block text-sm font-medium text-brand-fg/80">
-                  Phone (optional)
+                  WhatsApp / phone number <span className="text-red-500">*</span>
                 </label>
                 <input
                   id="phone"
+                  type="tel"
+                  required
                   className={field}
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  placeholder="So we can share joining details"
+                  placeholder="+91 98XXXXXXXX"
                 />
+                <p className="mt-1 text-xs text-brand-fg/55">
+                  Required — we&apos;ll message you on WhatsApp with schedule &amp; joining details.
+                </p>
               </div>
               <div>
                 <span className="mb-1 block text-sm font-medium text-brand-fg/80">
@@ -239,7 +244,13 @@ export function EnrollFlow({
           <button
             type="button"
             onClick={() => setStep((s) => s + 1)}
-            className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-brand-accent px-5 text-sm font-semibold text-white hover:bg-brand-accent/90"
+            disabled={step === 1 && phone.replace(/\D/g, "").length < 7}
+            title={
+              step === 1 && phone.replace(/\D/g, "").length < 7
+                ? "A valid phone number is required"
+                : undefined
+            }
+            className="inline-flex h-10 items-center gap-1.5 rounded-lg bg-brand-accent px-5 text-sm font-semibold text-white hover:bg-brand-accent/90 disabled:opacity-50"
           >
             Continue <ArrowRight className="h-4 w-4" />
           </button>

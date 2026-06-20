@@ -50,7 +50,11 @@ function renderText(lead: Lead) {
 }
 
 export async function sendLead(lead: Lead): Promise<SendLeadResult> {
-  const to = process.env.CONTACT_TO || process.env.CONTACT_EMAIL || "hello@example.com";
+  const to =
+    process.env.CONTACT_TO ||
+    process.env.CONTACT_EMAIL ||
+    process.env.LEAD_NOTIFY_TO ||
+    "hello@example.com";
   const typeLabel = lead.type === "demo" ? "demo request" : lead.type === "contact" ? "contact" : "lead";
   const subject = `New ${typeLabel}: ${lead.name}`;
   const text = renderText(lead);

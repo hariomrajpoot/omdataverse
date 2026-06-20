@@ -11,6 +11,7 @@ export default async function AdminEnrollmentsPage() {
       [e.user.profile?.firstName, e.user.profile?.lastName].filter(Boolean).join(" ") ||
       e.user.email.split("@")[0],
     email: e.user.email,
+    phone: e.phone ?? "",
     training: e.training.title,
     status: e.status,
     createdAt: e.createdAt.toISOString(),

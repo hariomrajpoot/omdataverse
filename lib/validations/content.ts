@@ -63,7 +63,7 @@ export type UserRoleUpdateInput = z.infer<typeof userRoleUpdateSchema>;
 
 export const enrollmentCreateSchema = z.object({
   trainingId: z.string().min(1, "Training is required"),
-  phone: z.string().trim().max(40).optional().or(z.literal("")),
+  phone: z.string().trim().min(7, "A valid phone number is required").max(40),
   experience: z.string().trim().max(60).optional().or(z.literal("")),
   goals: z.string().trim().max(1000).optional().or(z.literal("")),
 });
