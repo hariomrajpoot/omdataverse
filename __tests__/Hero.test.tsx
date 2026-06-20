@@ -2,21 +2,22 @@ import { render, screen } from "@testing-library/react";
 import { Hero } from "@/components/Hero";
 
 describe("Hero", () => {
-  it("renders title and CTAs", () => {
+  it("renders title, CTAs and badges", () => {
     render(
       <Hero
-        title="Data platforms and AI—delivered responsibly."
+        title="Data platforms and AI"
         subtitle="Build foundations, then accelerate."
         primaryCta={{ label: "Book audit", href: "/contact" }}
         secondaryCta={{ label: "Case studies", href: "/case-studies" }}
-        chips={["Azure", "Fabric"]}
+        badges={[
+          { label: "Azure", logo: "/logos/azure.svg" },
+          { label: "Fabric", logo: "/logos/fabric.svg" },
+        ]}
       />,
     );
 
     expect(
-      screen.getByRole("heading", {
-        name: /Data platforms and AI—delivered responsibly\./i,
-      }),
+      screen.getByRole("heading", { name: /Data platforms and AI/i }),
     ).toBeInTheDocument();
 
     expect(screen.getByRole("link", { name: /Book audit/i })).toHaveAttribute(
@@ -32,4 +33,3 @@ describe("Hero", () => {
     expect(screen.getByText("Fabric")).toBeInTheDocument();
   });
 });
-

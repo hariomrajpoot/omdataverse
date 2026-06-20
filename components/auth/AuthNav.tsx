@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { ThemeToggle } from "@/features/shared/components/ThemeToggle";
 
 // Compact auth controls for the public navbar: sign-in/up when logged out;
 // a profile dropdown (avatar + menu) when logged in.
@@ -17,6 +18,7 @@ export function AuthNav() {
   if (!user) {
     return (
       <div className="hidden items-center gap-2 sm:flex">
+        <ThemeToggle />
         <Link
           href="/login"
           className="inline-flex h-9 items-center rounded-lg px-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"

@@ -3,8 +3,16 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Pencil, Plus, Trash2, X } from "lucide-react";
+import { ImageUpload } from "@/components/ui/ImageUpload";
 
-export type FieldType = "text" | "textarea" | "number" | "list" | "outcomes" | "boolean";
+export type FieldType =
+  | "text"
+  | "textarea"
+  | "number"
+  | "list"
+  | "outcomes"
+  | "boolean"
+  | "image";
 
 export interface FieldDef {
   name: string;
@@ -260,7 +268,13 @@ export function ContentManager({
                       <label className="mb-1 block text-sm font-medium text-brand-fg/80">
                         {f.label}
                       </label>
-                      {f.type === "textarea" || f.type === "list" || f.type === "outcomes" ? (
+                      {f.type === "image" ? (
+                        <ImageUpload
+                          value={String(form[f.name] ?? "")}
+                          onChange={(url) => setForm((s) => ({ ...s, [f.name]: url }))}
+                          folder={type}
+                        />
+                      ) : f.type === "textarea" || f.type === "list" || f.type === "outcomes" ? (
                         <textarea
                           rows={f.type === "textarea" ? 3 : 4}
                           className={fieldClass}

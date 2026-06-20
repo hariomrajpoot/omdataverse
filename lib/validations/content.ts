@@ -35,6 +35,11 @@ export const trainingSchema = z.object({
   duration: z.string().trim().min(1).max(40),
   summary: z.string().trim().min(2).max(600),
   topics: z.array(z.string().trim().min(1).max(200)).max(20),
+  category: z.string().trim().max(40).optional().or(z.literal("")),
+  imageUrl: z.string().trim().url("Must be a URL").max(500).optional().or(z.literal("")),
+  rating: z.number().min(0).max(5).optional(),
+  eventDate: z.string().trim().max(40).optional().or(z.literal("")),
+  capacity: z.number().int().min(0).max(100000).optional(),
   published: z.boolean().default(true),
   order: z.number().int().min(0).default(0),
 });
@@ -50,6 +55,11 @@ export const serviceSchema = z.object({
   order: z.number().int().min(0).default(0),
 });
 export type ServiceInput = z.infer<typeof serviceSchema>;
+
+export const userRoleUpdateSchema = z.object({
+  role: z.enum(["ADMIN", "CLIENT"]),
+});
+export type UserRoleUpdateInput = z.infer<typeof userRoleUpdateSchema>;
 
 export const enrollmentCreateSchema = z.object({
   trainingId: z.string().min(1, "Training is required"),

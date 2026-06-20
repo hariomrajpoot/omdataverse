@@ -39,15 +39,24 @@ function mapCaseStudy(row: DbCaseStudy): CaseStudy {
   };
 }
 
-function mapTraining(row: DbTraining): Training {
+function mapTraining(
+  row: DbTraining & { _count?: { enrollments: number } },
+): Training {
   return {
     id: row.id,
+    _id: row.id,
     title: row.title,
     slug: row.slug,
     level: row.level,
     duration: row.duration,
     summary: row.summary,
     topics: row.topics,
+    category: row.category,
+    imageUrl: row.imageUrl,
+    rating: row.rating,
+    eventDate: row.eventDate ? row.eventDate.toISOString() : null,
+    capacity: row.capacity,
+    registrationCount: row._count?.enrollments ?? 0,
   };
 }
 
@@ -83,12 +92,16 @@ export async function getTrainings(): Promise<Training[]> {
   const rows = await prisma.training.findMany({
     where: { published: true },
     orderBy: { order: "asc" },
+    include: { _count: { select: { enrollments: true } } },
   });
   return rows.map(mapTraining);
 }
 
 export async function getTrainingBySlug(slug: string): Promise<Training | null> {
-  const row = await prisma.training.findUnique({ where: { slug } });
+  const row = await prisma.training.findUnique({
+    where: { slug },
+    include: { _count: { select: { enrollments: true } } },
+  });
   if (!row || !row.published) return null;
   return mapTraining(row);
 }

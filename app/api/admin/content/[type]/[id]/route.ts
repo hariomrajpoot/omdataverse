@@ -7,7 +7,26 @@ import {
   trainingSchema,
   projectSchema,
   serviceSchema,
+  type TrainingInput,
 } from "@/lib/validations/content";
+
+function buildTraining(d: TrainingInput) {
+  return {
+    title: d.title,
+    slug: d.slug,
+    level: d.level,
+    duration: d.duration,
+    summary: d.summary,
+    topics: d.topics,
+    category: d.category || "workshop",
+    imageUrl: d.imageUrl || null,
+    rating: typeof d.rating === "number" && d.rating > 0 ? d.rating : null,
+    capacity: typeof d.capacity === "number" && d.capacity > 0 ? d.capacity : null,
+    eventDate: d.eventDate ? new Date(d.eventDate) : null,
+    published: d.published,
+    order: d.order,
+  };
+}
 
 export const runtime = "nodejs";
 
@@ -50,7 +69,7 @@ function updateRow(type: ContentType, id: string, data: unknown) {
       });
     }
     case "trainings":
-      return prisma.training.update({ where: { id }, data: data as Prisma.TrainingUpdateInput });
+      return prisma.training.update({ where: { id }, data: buildTraining(data as TrainingInput) });
     case "services":
       return prisma.service.update({ where: { id }, data: data as Prisma.ServiceUpdateInput });
     case "projects": {

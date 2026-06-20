@@ -232,6 +232,10 @@ const trainings = [
       "Building visuals and dashboards",
       "Publishing and sharing reports",
     ],
+    category: "bootcamp",
+    rating: 4.8,
+    capacity: 30,
+    eventDate: new Date("2026-08-15T09:00:00.000Z"),
     order: 1,
   },
   {
@@ -247,6 +251,10 @@ const trainings = [
       "DAX: measures and calculated columns",
       "Report design, publishing, and governance",
     ],
+    category: "workshop",
+    rating: 4.9,
+    capacity: 25,
+    eventDate: new Date("2026-09-01T09:00:00.000Z"),
     order: 2,
   },
   {
@@ -262,6 +270,10 @@ const trainings = [
       "Building and orchestrating Databricks Jobs",
       "Workflow automation and optimization",
     ],
+    category: "masterclass",
+    rating: 4.9,
+    capacity: 20,
+    eventDate: new Date("2026-09-20T09:00:00.000Z"),
     order: 3,
   },
 ];

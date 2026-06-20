@@ -162,6 +162,11 @@ model Training {
   duration    String
   summary     String
   topics      String[]
+  category    String       @default("workshop")
+  imageUrl    String?
+  rating      Float?
+  eventDate   DateTime?
+  capacity    Int?
   published   Boolean      @default(true)
   order       Int          @default(0)
   enrollments Enrollment[]

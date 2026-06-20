@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { ImageUpload } from "@/components/ui/ImageUpload";
 
 interface ProfileForm {
   firstName: string;
@@ -128,15 +129,11 @@ export default function AccountPage() {
         </div>
 
         <div>
-          <label className={label} htmlFor="avatarUrl">Avatar URL</label>
-          <input
-            id="avatarUrl"
-            type="url"
-            className={field}
-            placeholder="https://…"
+          <span className={label}>Avatar</span>
+          <ImageUpload
             value={form.avatarUrl}
-            onChange={(e) => setForm((f) => ({ ...f, avatarUrl: e.target.value }))}
-            maxLength={500}
+            onChange={(url) => setForm((f) => ({ ...f, avatarUrl: url }))}
+            folder="avatars"
           />
         </div>
 

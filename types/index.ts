@@ -29,12 +29,19 @@ export interface CaseStudy {
 
 export interface Training {
   id?: string;
+  _id?: string;
   title: string;
   slug: string;
   level: string;
   duration: string;
   summary: string;
   topics: string[];
+  category?: string;
+  imageUrl?: string | null;
+  rating?: number | null;
+  eventDate?: string | null; // ISO
+  capacity?: number | null;
+  registrationCount?: number;
 }
 
 export interface Project {

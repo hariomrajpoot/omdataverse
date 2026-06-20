@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import {
   ArrowLeft,
   ArrowRight,
-  Check,
+  Calendar,
   Clock,
   GraduationCap,
   Laptop,
@@ -14,6 +14,9 @@ import { getTrainingBySlug } from "@/lib/content";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import { getUserEnrollment } from "@/lib/enrollments";
 import { Reveal } from "@/components/motion/Reveal";
+import { CountdownTimer } from "@/components/trainings/CountdownTimer";
+import { SeatCounter } from "@/components/trainings/SeatCounter";
+import { TrainingAgenda } from "@/components/trainings/TrainingAgenda";
 
 export const dynamic = "force-dynamic";
 
@@ -91,17 +94,9 @@ export default async function TrainingDetailPage({
               <h2 className="text-2xl font-semibold tracking-tight text-brand-fg">
                 What you&apos;ll learn
               </h2>
-              <ul className="mt-5 grid gap-3 sm:grid-cols-2">
-                {training.topics.map((topic) => (
-                  <li
-                    key={topic}
-                    className="flex gap-2.5 rounded-xl border border-brand-border/50 bg-brand-surface/60 p-4 text-sm leading-6 text-brand-fg/80"
-                  >
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-accent" />
-                    <span>{topic}</span>
-                  </li>
-                ))}
-              </ul>
+              <div className="mt-5">
+                <TrainingAgenda items={training.topics} />
+              </div>
             </Reveal>
           )}
 
@@ -130,8 +125,23 @@ export default async function TrainingDetailPage({
 
         {/* Enroll sidebar */}
         <aside className="lg:col-span-1">
-          <Reveal className="sticky top-24 rounded-2xl border border-brand-border/50 bg-brand-surface/60 p-6">
-            {enrollment ? (
+          <Reveal className="sticky top-24 space-y-5 rounded-2xl border border-brand-border/50 bg-brand-surface/60 p-6">
+            {training.eventDate && (
+              <div>
+                <div className="mb-2 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-brand-fg/50">
+                  <Calendar className="h-3.5 w-3.5" /> Starts in
+                </div>
+                <CountdownTimer date={training.eventDate} />
+              </div>
+            )}
+            {training.capacity ? (
+              <SeatCounter
+                capacity={training.capacity}
+                registrationCount={training.registrationCount ?? 0}
+              />
+            ) : null}
+            <div>
+              {enrollment ? (
               <>
                 <div className="flex items-center gap-2 text-brand-fg">
                   <CheckCircle2 className="h-5 w-5 text-green-500" />
@@ -169,6 +179,7 @@ export default async function TrainingDetailPage({
                 )}
               </>
             )}
+            </div>
           </Reveal>
         </aside>
       </div>

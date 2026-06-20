@@ -1,11 +1,10 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/features/shared/lib/site";
-import { ThemeToggle } from "@/features/shared/components/ThemeToggle";
 import { AuthNav } from "@/components/auth/AuthNav";
 import { Menu, X } from "lucide-react";
 
@@ -25,16 +24,9 @@ const navLinks: NavLink[] = [
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { scrollY } = useScroll();
-  const backgroundOpacity = useTransform(scrollY, [0, 100], [0.8, 0.95]);
-  const backdropBlur = useTransform(scrollY, [0, 100], [8, 12]);
 
   return (
     <motion.header
-      style={{
-        backgroundColor: useTransform(backgroundOpacity, (value) => `rgba(255, 255, 255, ${value})`),
-        backdropFilter: useTransform(backdropBlur, (value) => `blur(${value}px)`),
-      }}
       className="sticky top-0 z-50 border-b border-slate-200/50 dark:border-slate-700/50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md"
     >
       <a href="#main" className="sr-only focus:not-sr-only">
@@ -93,7 +85,6 @@ export function Navbar() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="flex items-center gap-3"
         >
-          <ThemeToggle />
           <AuthNav />
           <Button asChild className="hidden sm:inline-flex bg-brand-accent text-white hover:bg-brand-accent/90 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
             <Link href={siteConfig.links.bookAudit}>
@@ -143,7 +134,7 @@ export function Navbar() {
             <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
               <Button asChild className="w-full bg-brand-accent text-white hover:bg-brand-accent/90">
                 <Link href={siteConfig.links.bookAudit} onClick={() => setIsMenuOpen(false)}>
-                  Book Audit
+                  Book Demo
                 </Link>
               </Button>
             </div>
